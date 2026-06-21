@@ -100,6 +100,24 @@ description: >
 
 参考文件（脚本、表格、示例）可以放在 `references/` 子目录中——匹配时会随技能一起注入。
 
+### 条件激活技能
+
+你可以使用 `when_to_use` 前置字段，让技能仅在特定模组存在时才激活。AI 代理可以检查 `GameData/` 来确认模组是否安装：
+
+```yaml
+---
+name: my-mod-guide
+description: >
+  MyMod 的知识库。仅在模组已安装时激活。
+when_to_use: |
+  当用户的 GameData 文件夹中包含 "MyMod" 时触发。
+condition: file_exists("MyMod/") -> true
+---
+# MyMod 配置指南
+```
+
+使用 `file_exists` 或 `list_directory` 工具调用作为条件来控制技能加载——这样 DeepJeb 就不会为你未安装的模组加载无关知识。
+
 ---
 
 ## 安装

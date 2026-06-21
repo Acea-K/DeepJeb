@@ -100,6 +100,24 @@ description: >
 
 Reference files (scripts, tables, examples) can be placed in a `references/` subdirectory — they'll be injected alongside the skill when matched.
 
+### Conditional Skill Activation
+
+You can use the `when_to_use` frontmatter field to make a skill only activate when a specific mod is present. The AI agent can check `GameData/` for installed mods before loading the skill:
+
+```yaml
+---
+name: my-mod-guide
+description: >
+  Knowledge base for MyMod. Only activate when the mod is installed.
+when_to_use: |
+  Trigger when the user's GameData folder contains "MyMod".
+condition: file_exists("MyMod/") -> true
+---
+# MyMod configuration guide
+```
+
+Use `file_exists` or `list_directory` tool calls as conditions to gate skill loading — this way DeepJeb won't load irrelevant knowledge for mods you don't have installed.
+
 ---
 
 ## Installation
