@@ -3,38 +3,28 @@
 ## v0.5.1
 
 **Display & Markdown**
-- Heading H4 (`####`) support added
-- All line heights (H1-H4, Text, ListItem, OrderedItem, TableRow) measured via `GUIStyle.CalcHeight` at precise render-per-pass widths — no hardcoded heights
-- Content height measurement matches rendering pass exactly (initial offset, label height, per-line width)
-- Cumulative height drift eliminated; margin formula `min(measured×10%, 200px)` only applied when content exceeds viewport
-- Scroll-to-bottom uses continuous follow mode, auto-releases on manual scroll-up
-- Leading empty parsed lines trimmed, trailing preserved for message separation
-- `<` escaped with ZWS to prevent Unity rich-text tag corruption
+- Heading H4 (`####`) now recognized and rendered correctly
+- All heading (H1-H4), text, list, and table row heights measured via `GUIStyle.CalcHeight` at precise per-type widths — zero hardcoded heights
+- Content height measurement passes match rendering passes exactly; margin formula `min(measured×10%, 200px)` applied only when content exceeds viewport
+- Scroll-to-bottom uses continuous follow mode, auto-releases when user scrolls up
+- Leading empty parsed lines trimmed to prevent unwanted top gaps
+- `<` escaped with zero-width space to prevent Unity rich-text tag corruption in plain text
 
-**Security**
-- System prompt never displayed in chat — all System/Tool messages filtered at render time
-- Session load replaces old system prompt with current pipeline version
-- Provider switch on session load validates model against provider's enabled list (prevents 400)
+**Settings Window**
+- Model checkbox list made scrollable — no longer overflows and blocks Save/Close buttons
+- Presets panel height fills available form space instead of fixed 120px
+- Presets scrollbar position persisted across frames
 
-**Provider & HTTP**
-- `ExtraHeaders` moved from global static to per-request parameter (prevents cross-provider header leak)
-- `onRequestCreated` callback chain enables `HttpWebRequest.Abort()` on Stop generation
-- `_activeHttpRequest` volatile for thread-safe abort
-- Anthropic streaming error events handled
-- GoogleClient `functionCall` parts emitted for assistant tool calls
+**Session & Security**
+- System prompt never displayed in chat — all System messages filtered from render output
+- Loading a session replaces old system prompt with current version
+- Provider switch on session load validates model against provider's enabled list (prevents 400 Bad Request)
 
-**Fixes**
-- InputLock released on window hide (prevents permanent control lockout)
-- `TrimDisplayMessages` preserves system + recent non-system messages
-- PathSandbox directory-boundary check prevents same-prefix escape
-- ContextManager uses `ConcurrentDictionary` + `OrderByDescending` for deterministic model matching
-- `maxTokens` guarded against negative; `reservedTokens` accounts for user message in truncation
-- Force-summary tool calls stripped from conversation (no orphan tool calls)
-- `.bak` pruning keeps last 3 per file; `bytes_written` uses UTF-8 byte count
-- `ParseArgs`/`GetString` deduplicated into `ToolJson` shared helper
-- `AiResponse` moved to `DeepJeb.Core.Models`
-- Windows centered on first open
-- Settings presets scrollbar state persisted; model checkbox list scrollable
+**Streaming**
+- Trailing tokens from a streaming round flushed before sentinel-triggered finalization (prevents round-boundary token loss)
+
+**UI**
+- Chat and Settings windows centered on first open, adaptive to any resolution
 
 ## v0.5.0
 
