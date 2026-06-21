@@ -149,6 +149,8 @@ Use `file_exists` or `list_directory` tool calls as conditions to gate skill loa
 
 Copyright © 2026 Acea - vibe coded using Claude Code / DeepSeek V4 Pro
 
+MiniJSON based on the public-domain implementation by Calvin Rien.
+
 ---
 
 <p align="center">
