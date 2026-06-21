@@ -16,6 +16,10 @@
   <a href="#"><img src="https://img.shields.io/badge/version-0.5.0-green" alt="v0.5.0"></a>
 </p>
 
+<p align="center">
+  <strong>English</strong> | <a href="README_cn.md">中文</a>
+</p>
+
 ---
 
 ## What is DeepJeb?
