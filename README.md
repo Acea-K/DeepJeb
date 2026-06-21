@@ -125,7 +125,7 @@ Reference files (scripts, tables, examples) can be placed in a `references/` sub
 
 [MIT License](LICENSE)
 
-Copyright © 2025 DeepJeb Contributors
+Copyright © 2026 Acea - vibe coded using Claude Code / DeepSeek V4 Pro
 
 ---
 
