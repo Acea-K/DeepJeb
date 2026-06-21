@@ -461,10 +461,11 @@ namespace DeepJeb
             Config.ActiveModel = _activeModel;
         }
 
-        private void SwitchToProviderByName(string name)
+        private bool SwitchToProviderByName(string name)
         {
             int idx = _providers.FindIndex(p => p.Name == name);
-            if (idx >= 0) SwitchToProvider(idx);
+            if (idx >= 0) { SwitchToProvider(idx); return true; }
+            return false;
         }
 
         private void OpenAddWizard()
@@ -661,10 +662,33 @@ namespace DeepJeb
             if (data == null) return;
 
             ChatSession.Messages = data.Messages ?? new List<ChatMessage>();
+
+            // Replace any old system prompt with the current pipeline version.
+            // Old prompts may lack critical rules (emoji ban, MM patch restrictions, etc.).
+            if (ChatSession.Messages.Count > 0 && ChatSession.Messages[0].Role == ChatMessage.RoleType.System)
+            {
+                ChatSession.Messages[0] = ChatMessage.CreateSystem(ChatPipeline?.SystemPrompt ?? "");
+            }
+
+            // Switch to the loaded session's provider. If the provider no longer
+            // exists, keep the current client to avoid client/model mismatch (400).
+            bool switched = false;
+            if (!string.IsNullOrEmpty(data.ProviderName))
+                switched = SwitchToProviderByName(data.ProviderName);
+
+            if (switched && !string.IsNullOrEmpty(data.ModelName))
+            {
+                // Only use the loaded model if it's available for this provider
+                var cfg = _providers.Find(p => p.Name == data.ProviderName);
+                if (cfg != null && cfg.EnabledModels != null && cfg.EnabledModels.Contains(data.ModelName))
+                    _activeModel = data.ModelName;
+                // else: keep the provider's default model (set by SwitchToProvider)
+            }
+
             ChatSession.ProviderName = data.ProviderName;
             ChatSession.ModelName = data.ModelName;
 
-            // Rebuild display
+            // Rebuild display (System messages are filtered out at render time)
             if (_chatWindow != null)
             {
                 _chatWindow.ProviderName = data.ProviderName;

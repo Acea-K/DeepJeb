@@ -1,11 +1,11 @@
 {
   "NAME": "DeepJeb",
-  "URL": "https://github.com/DeepJeb/DeepJeb",
-  "DOWNLOAD": "https://github.com/DeepJeb/DeepJeb/releases",
+  "URL": "https://github.com/Acea-K/DeepJeb",
+  "DOWNLOAD": "https://github.com/Acea-K/DeepJeb/releases",
   "VERSION": {
     "MAJOR": 0,
     "MINOR": 5,
-    "PATCH": 0,
+    "PATCH": 1,
     "BUILD": 0
   },
   "KSP_VERSION": {

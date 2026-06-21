@@ -24,6 +24,7 @@ namespace DeepJeb.Unity.UI.Chat
         // ---- Public state ----
         public bool IsVisible { get; set; }
         public Rect WindowRect { get; set; } = new Rect(100, 100, 600, 500);
+        private bool _centered;
 
         /// <summary>The chat session driving this window.</summary>
         public ChatSession Session { get; set; }
@@ -73,7 +74,8 @@ namespace DeepJeb.Unity.UI.Chat
         private Vector2 _scrollPos;
         private bool _showClearConfirm;
         private List<DisplayMessage> _messages = new List<DisplayMessage>();
-        private bool _needsScrollUpdate;
+        private bool _followBottom = true;  // true = auto-scroll to bottom each frame
+        private float _prevScrollY;         // detect manual scroll-up
         private DisplayMessage _streamingMsg;    // In-progress streaming assistant message
         private DisplayMessage _toolProgressMsg; // Reusable tool-progress line (Issue 3)
         private DisplayMessage _progressDotsMsg;   // Reference to progress dots message
@@ -158,6 +160,16 @@ namespace DeepJeb.Unity.UI.Chat
         {
             if (!IsVisible) return;
 
+            // Center on first open after becoming visible
+            if (!_centered)
+            {
+                WindowRect = new Rect(
+                    (Screen.width - WindowRect.width) / 2f,
+                    (Screen.height - WindowRect.height) / 2f,
+                    WindowRect.width, WindowRect.height);
+                _centered = true;
+            }
+
             GUI.skin = HighLogic.Skin;
             WindowRect = GUI.Window(GetInstanceID(), WindowRect, DrawWindow,
                 "DeepJeb", HighLogic.Skin.window);
@@ -170,7 +182,7 @@ namespace DeepJeb.Unity.UI.Chat
             // --- Title bar: drag area + Help button ---
             GUI.DragWindow(new Rect(0, 0, WindowRect.width - 30, TitleH));
             if (GUI.Button(new Rect(WindowRect.width - 28, 1, 24, TitleH - 2), "?", HighLogic.Skin.button))
-                Application.OpenURL("https://github.com/DeepJeb/DeepJeb/wiki");
+                Application.OpenURL("https://github.com/Acea-K/DeepJeb");
 
             // --- Toolbar: 4 equal buttons between title and messages ---
             float tbY = TitleH + 2;
@@ -219,54 +231,84 @@ namespace DeepJeb.Unity.UI.Chat
 
             GUI.Box(msgRect, "");
 
-            // Reusable rich-text style for measurement and rendering (cached, lazily initialized)
-            // Effective text width: viewRect - scrollbar(18) - indent(12) - margins(~28)
-            float effectiveTextW = msgRect.width - 58f;
+            // Precise render widths per line type — MUST match the label rects below
+            float viewW = msgRect.width - 18;       // = viewRect.width
+            float wHeading  = viewW - 20;            // indent 0
+            float wText     = viewW - 20 - 12;       // indent 12
+            float wList     = viewW - 20 - 16;       // indent 16
+            float wOrdered  = viewW - 20 - 20;       // indent 20
 
-            // Calculate total content height — per-line-type to match actual rendering
-            float contentH = 10f;
+            // Calculate total content height — MUST match the rendering pass exactly
+            float contentH = 4f; // matches lineY = 4 in rendering
             foreach (var dm in _messages)
             {
-                contentH += 4; // gap before message
-                // Role label
+                // Role label (matches GUI.Label at height 18)
                 bool hasLabel = dm.Role == ChatMessage.RoleType.User ||
                                 dm.Role == ChatMessage.RoleType.Assistant ||
                                 dm.Role == ChatMessage.RoleType.System;
-                if (hasLabel) contentH += 22; // role strip: 18px + 4px spacing
+                if (hasLabel) contentH += 18;
                 // Parsed lines
                 foreach (var ml in dm.ParsedLines)
                 {
                     switch (ml.Type)
                     {
-                        case MarkdownParser.LineType.Heading1: contentH += 22; break;
-                        case MarkdownParser.LineType.Heading2: contentH += 20; break;
-                        case MarkdownParser.LineType.Heading3: contentH += 18; break;
+                        case MarkdownParser.LineType.Heading1:
+                            contentH += RichStyle.CalcHeight(
+                                new GUIContent("<b><size=18>" + ml.RichText + "</size></b>"),
+                                wHeading) + 2f; break;
+                        case MarkdownParser.LineType.Heading2:
+                            contentH += RichStyle.CalcHeight(
+                                new GUIContent("<b><size=15>" + ml.RichText + "</size></b>"),
+                                wHeading) + 2f; break;
+                        case MarkdownParser.LineType.Heading3:
+                            contentH += RichStyle.CalcHeight(
+                                new GUIContent("<b><size=13>" + ml.RichText + "</size></b>"),
+                                wHeading) + 2f; break;
+                        case MarkdownParser.LineType.Heading4:
+                            contentH += RichStyle.CalcHeight(
+                                new GUIContent("<b><size=11>" + ml.RichText + "</size></b>"),
+                                wHeading) + 2f; break;
                         case MarkdownParser.LineType.CodeBlock:
                             contentH += CountLines(ml.RichText) * 16f + 12; break;
                         case MarkdownParser.LineType.TableRow:
-                            contentH += (ml.IsTableHeader ? 22f : 18f) + 2f; break;
+                            contentH += MaxTableCellHeight(ml, viewW) + 2f; break;
                         case MarkdownParser.LineType.TableSeparator: contentH += 4; break;
                         case MarkdownParser.LineType.ListItem:
-                        case MarkdownParser.LineType.OrderedItem: contentH += 18; break;
-                        default:
-                            // Measure actual wrapped height (handles CJK, variable-width glyphs)
                             contentH += RichStyle.CalcHeight(
-                                new GUIContent(ml.RichText), effectiveTextW) + 2f;
+                                new GUIContent("• " + ml.RichText), wList) + 2f; break;
+                        case MarkdownParser.LineType.OrderedItem:
+                            contentH += RichStyle.CalcHeight(
+                                new GUIContent(ml.RichText), wOrdered) + 2f; break;
+                        default:
+                            contentH += RichStyle.CalcHeight(
+                                new GUIContent(ml.RichText), wText) + 2f;
                             break;
                     }
                 }
                 contentH += 6; // gap after message
             }
-            contentH = Mathf.Max(msgH, contentH);
+            // CalcHeight underestimates GUI.Label with <size>/<b>/CJK/emoji.
+            // Only add margin when content exceeds the viewport (scrollbar is active).
+            if (contentH > msgH)
+            {
+                float margin = Mathf.Min(contentH * 0.10f, 200f);
+                contentH += margin;
+            }
+            contentH = Mathf.Max(contentH, msgH);
 
             Rect viewRect = new Rect(0, 0, msgRect.width - 18, contentH);
-            // Apply pending scroll before BeginScrollView to avoid one-frame lag
-            if (_needsScrollUpdate)
+            // Follow-bottom: auto-scroll when new content arrives, stop when
+            // user manually scrolls up to read history.
+            if (_followBottom)
             {
-                _scrollPos.y = float.MaxValue;
-                _needsScrollUpdate = false;
+                _scrollPos.y = Mathf.Max(0, contentH - msgRect.height + 50f);
             }
             _scrollPos = GUI.BeginScrollView(msgRect, _scrollPos, viewRect);
+            if (_followBottom && _scrollPos.y < _prevScrollY - 2f)
+            {
+                _followBottom = false; // User scrolled up — release auto-follow
+            }
+            _prevScrollY = _scrollPos.y;
 
             float lineY = 4;
             float lineH = 18;
@@ -304,23 +346,27 @@ namespace DeepJeb.Unity.UI.Chat
                     {
                         case MarkdownParser.LineType.Heading1:
                             text = "<b><size=18>" + text + "</size></b>";
-                            lineH = 22;
+                            lineH = RichStyle.CalcHeight(new GUIContent(text), wHeading);
                             break;
                         case MarkdownParser.LineType.Heading2:
                             text = "<b><size=15>" + text + "</size></b>";
-                            lineH = 18;
+                            lineH = RichStyle.CalcHeight(new GUIContent(text), wHeading);
                             break;
                         case MarkdownParser.LineType.Heading3:
                             text = "<b><size=13>" + text + "</size></b>";
-                            lineH = 16;
+                            lineH = RichStyle.CalcHeight(new GUIContent(text), wHeading);
+                            break;
+                        case MarkdownParser.LineType.Heading4:
+                            text = "<b><size=11>" + text + "</size></b>";
+                            lineH = RichStyle.CalcHeight(new GUIContent(text), wHeading);
                             break;
                         case MarkdownParser.LineType.ListItem:
                             indent = 16; prefix = "• ";
-                            lineH = 16;
+                            lineH = RichStyle.CalcHeight(new GUIContent(prefix + text), wList);
                             break;
                         case MarkdownParser.LineType.OrderedItem:
                             indent = 20;
-                            lineH = 16;
+                            lineH = RichStyle.CalcHeight(new GUIContent(text), wOrdered);
                             break;
                         case MarkdownParser.LineType.CodeBlock:
                             GUI.color = new Color(0.12f, 0.12f, 0.16f);
@@ -350,7 +396,7 @@ namespace DeepJeb.Unity.UI.Chat
                     }
 
                     if (ml.Type == MarkdownParser.LineType.Text)
-                        lineH = RichStyle.CalcHeight(new GUIContent(text), effectiveTextW);
+                        lineH = RichStyle.CalcHeight(new GUIContent(text), wText);
 
                     GUI.color = Color.white;
                     GUI.Label(new Rect(8 + indent, lineY, viewRect.width - 20 - indent, lineH + 2),
@@ -533,7 +579,7 @@ namespace DeepJeb.Unity.UI.Chat
                     new MarkdownParser.MarkdownLine { RichText = text }
                 }
             });
-            _needsScrollUpdate = true;
+            _followBottom = true;
 
             if (OnSendMessage != null)
             {
@@ -549,7 +595,7 @@ namespace DeepJeb.Unity.UI.Chat
                     AddAiResponse(response);
                 }
                 // Async (streaming): dots stay until first token arrives, or user stops generation.
-                _needsScrollUpdate = true;
+                _followBottom = true;
             }
         }
 
@@ -653,7 +699,7 @@ namespace DeepJeb.Unity.UI.Chat
                 Type = MarkdownParser.LineType.Text,
                 RichText = MarkdownParser.EscapeRichText(partialText)
             });
-            _needsScrollUpdate = true;
+            _followBottom = true;
         }
 
         /// <summary>Finalize current streaming round: full markdown parse, clear tool progress.</summary>
@@ -670,7 +716,7 @@ namespace DeepJeb.Unity.UI.Chat
             }
             _streamingMsg = null;
             TrimDisplayMessages();
-            _needsScrollUpdate = true;
+            _followBottom = true;
         }
 
         public void AddAiResponse(string text)
@@ -728,14 +774,9 @@ namespace DeepJeb.Unity.UI.Chat
             _toolProgressMsg = null;
             foreach (var msg in messages)
             {
-                // Skip system messages that are injected knowledge/ref (filtered in save)
-                if (msg.Role == ChatMessage.RoleType.Tool) continue; // Tool results don't display directly
-                if (msg.Role == ChatMessage.RoleType.System && !string.IsNullOrEmpty(msg.Content))
-                {
-                    // Only show user-facing system messages (not injected [KNOWLEDGE]/[REF])
-                    if (msg.Content.StartsWith("[KNOWLEDGE") || msg.Content.StartsWith("[REF") || msg.Content.StartsWith("[PROCEDURAL]"))
-                        continue;
-                }
+                // Never display System or Tool messages — they belong in AI context only.
+                if (msg.Role == ChatMessage.RoleType.System) continue;
+                if (msg.Role == ChatMessage.RoleType.Tool) continue;
                 var displayMsg = new DisplayMessage
                 {
                     Role = msg.Role,
@@ -744,7 +785,7 @@ namespace DeepJeb.Unity.UI.Chat
                 };
                 _messages.Add(displayMsg);
             }
-            _needsScrollUpdate = true;
+            _followBottom = true;
         }
 
         /// <summary>Add or update the tool-progress line (reuses single message).</summary>
@@ -768,7 +809,7 @@ namespace DeepJeb.Unity.UI.Chat
                 Type = MarkdownParser.LineType.Text,
                 RichText = "<color=#0891B2>" + text + "</color>"
             });
-            _needsScrollUpdate = true;
+            _followBottom = true;
         }
 
         private string GetContextUsage()
@@ -821,7 +862,7 @@ namespace DeepJeb.Unity.UI.Chat
         /// <summary>Force a redraw (call after external state changes).</summary>
         public void RequestRedraw()
         {
-            _needsScrollUpdate = true;
+            _followBottom = true;
         }
 
         private void RenderTableRow(MarkdownParser.MarkdownLine ml, ref float y, float maxW, GUIStyle style)
@@ -829,7 +870,17 @@ namespace DeepJeb.Unity.UI.Chat
             if (ml.TableCells == null || ml.TableCells.Length == 0) return;
             int n = ml.TableCells.Length;
             float cellW = (maxW - 24) / n;
-            float rowH = ml.IsTableHeader ? 22 : 18;
+            // Compute max cell height so all cells in row have consistent height
+            float rowH = 0;
+            for (int i = 0; i < n; i++)
+            {
+                string cellText = ml.IsTableHeader
+                    ? "<b>" + (ml.TableCells[i] ?? "") + "</b>"
+                    : (ml.TableCells[i] ?? "");
+                float ch = style.CalcHeight(new GUIContent(cellText), cellW);
+                if (ch > rowH) rowH = ch;
+            }
+            if (rowH < 18) rowH = 18;
             for (int i = 0; i < n; i++)
             {
                 Rect cr = new Rect(12 + i * cellW, y, cellW, rowH);
@@ -852,6 +903,26 @@ namespace DeepJeb.Unity.UI.Chat
             if (string.IsNullOrEmpty(text)) return 0;
             int c = 1; foreach (char ch in text) if (ch == '\n') c++;
             return c;
+        }
+
+        /// <summary>Compute max cell height for a table row (shared by measurement + rendering).</summary>
+        private static float MaxTableCellHeight(MarkdownParser.MarkdownLine ml, float tableWidth)
+        {
+            if (ml.TableCells == null || ml.TableCells.Length == 0) return 18;
+            int n = ml.TableCells.Length;
+            float cellW = (tableWidth - 24) / n;
+            float maxH = 0;
+            // Use a disposable GUIStyle with richText for CalcHeight
+            var style = new GUIStyle(HighLogic.Skin.label) { richText = true };
+            for (int i = 0; i < n; i++)
+            {
+                string cellText = ml.IsTableHeader
+                    ? "<b>" + (ml.TableCells[i] ?? "") + "</b>"
+                    : (ml.TableCells[i] ?? "");
+                float ch = style.CalcHeight(new GUIContent(cellText), cellW);
+                if (ch > maxH) maxH = ch;
+            }
+            return maxH < 18 ? 18 : maxH;
         }
     }
 }

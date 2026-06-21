@@ -128,7 +128,7 @@ namespace DeepJeb.Protocol
             request.Method = method;
             request.Timeout = timeoutMs;
             request.ReadWriteTimeout = timeoutMs;
-            request.UserAgent = "DeepJeb/0.5 (KSP Mod)";
+            request.UserAgent = "DeepJeb/0.5.1 (KSP Mod)";
 
             if (!string.IsNullOrEmpty(apiKey))
             {

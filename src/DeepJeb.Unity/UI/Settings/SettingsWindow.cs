@@ -22,6 +22,7 @@ namespace DeepJeb.Unity.UI.Settings
     {
         public bool IsVisible { get; set; }
         public Rect WindowRect { get; set; } = new Rect(150, 80, 480, 520);
+        private bool _centered;
 
         /// <summary>Currently configured providers.</summary>
         public List<ProviderConfig> Providers { get; set; } = new List<ProviderConfig>();
@@ -44,6 +45,7 @@ namespace DeepJeb.Unity.UI.Settings
         private static readonly Color AccentColor = new Color(0.302f, 0.549f, 0.851f);
 
         private Vector2 _scrollPos;
+        private Vector2 _presetScrollPos;
         private int _removeIndex = -1;
         private bool _showAddForm;
         private string _newName = "";
@@ -137,6 +139,15 @@ namespace DeepJeb.Unity.UI.Settings
         {
             if (!IsVisible) return;
 
+            if (!_centered)
+            {
+                WindowRect = new Rect(
+                    (Screen.width - WindowRect.width) / 2f,
+                    (Screen.height - WindowRect.height) / 2f,
+                    WindowRect.width, WindowRect.height);
+                _centered = true;
+            }
+
             GUI.skin = HighLogic.Skin;
             WindowRect = GUI.Window(GetInstanceID(), WindowRect, DrawWindow,
                 DeepJebLoc.SettingsTitle, HighLogic.Skin.window);
@@ -202,18 +213,19 @@ namespace DeepJeb.Unity.UI.Settings
             }
             else
             {
-                float formH = _availableModels.Count > 0 ? 370 : 280;
+                float formH = _availableModels.Count > 0 ? 380 : 280;
                 GUI.Box(new Rect(8, y, WindowRect.width - 16, formH), "");
 
                 // Left: scrollable preset list
-                Rect presetRect = new Rect(12, y + 22, 150, 120);
+                float presetH = formH - 40f;
+                Rect presetRect = new Rect(12, y + 22, 150, presetH);
                 GUI.Label(new Rect(12, y + 4, 150, 18), "Presets:", HighLogic.Skin.label);
                 GUI.Box(presetRect, "");
 
                 var presets = ProviderConfig.BuiltInProviders();
                 float pContentH = (presets.Count + 1) * 22f;
                 Rect pViewRect = new Rect(0, 0, presetRect.width - 18, pContentH);
-                Vector2 presetScroll = GUI.BeginScrollView(presetRect, Vector2.zero, pViewRect);
+                _presetScrollPos = GUI.BeginScrollView(presetRect, _presetScrollPos, pViewRect);
                 float py = 0;
                 foreach (var p in presets)
                 {
@@ -264,29 +276,33 @@ namespace DeepJeb.Unity.UI.Settings
                     GUI.Label(new Rect(fx + 115, fy, 160, 22), _connectionStatus, HighLogic.Skin.label);
                 fy += 24;
 
-                // Model checkboxes (show after successful connection)
+                // Model checkboxes — scrollable to prevent overflow
                 if (_availableModels.Count > 0)
                 {
                     GUI.Label(new Rect(fx, fy, 100, 18), "Models:", HighLogic.Skin.label);
                     fy += 18;
-                    Rect mcRect = new Rect(fx, fy, 230, 80);
+                    float mcBoxH = Mathf.Min(100f, _availableModels.Count * 18f + 4f);
+                    Rect mcRect = new Rect(fx, fy, 230, mcBoxH);
                     GUI.Box(mcRect, "");
-                    float mcY = fy + 2;
+                    float mcContentH = _availableModels.Count * 18f + 4f;
+                    Rect mcViewRect = new Rect(0, 0, mcRect.width - 18, mcContentH);
+                    Vector2 mcScroll = GUI.BeginScrollView(mcRect, Vector2.zero, mcViewRect);
+                    float mcY = 2;
                     for (int m = 0; m < _availableModels.Count; m++)
                     {
                         string model = _availableModels[m];
                         bool enabled = _enabledModels.Contains(model);
-                        bool newVal = GUI.Toggle(new Rect(fx + 4, mcY, 220, 16), enabled, model, HighLogic.Skin.label);
+                        bool newVal = GUI.Toggle(new Rect(4, mcY, mcViewRect.width - 4, 16), enabled, model, HighLogic.Skin.label);
                         if (newVal != enabled)
                         {
                             if (newVal) _enabledModels.Add(model);
                             else _enabledModels.Remove(model);
                         }
-                        mcY += 16;
+                        mcY += 18;
                     }
-                    fy += 84;
+                    GUI.EndScrollView();
+                    fy += mcBoxH + 4;
                 }
-                fy += 4;
 
                 if (GUI.Button(new Rect(fx, fy, 60, 22), DeepJebLoc.Save, HighLogic.Skin.button))
                 {

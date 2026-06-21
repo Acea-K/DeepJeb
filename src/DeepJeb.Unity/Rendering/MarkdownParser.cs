@@ -13,7 +13,7 @@ namespace DeepJeb.Unity.Rendering
     /// </summary>
     public class MarkdownParser
     {
-        public enum LineType { Text, Heading1, Heading2, Heading3, CodeBlock, ListItem, OrderedItem, TableRow, TableSeparator }
+        public enum LineType { Text, Heading1, Heading2, Heading3, Heading4, CodeBlock, ListItem, OrderedItem, TableRow, TableSeparator }
 
         public struct MarkdownLine
         {
@@ -93,7 +93,11 @@ namespace DeepJeb.Unity.Rendering
                 }
 
                 // Headings
-                if (trimmed.StartsWith("### "))
+                if (trimmed.StartsWith("#### "))
+                {
+                    result.Add(new MarkdownLine { Type = LineType.Heading4, RichText = ParseInline(trimmed.Substring(5)) });
+                }
+                else if (trimmed.StartsWith("### "))
                 {
                     result.Add(new MarkdownLine { Type = LineType.Heading3, RichText = ParseInline(trimmed.Substring(4)) });
                 }
@@ -129,6 +133,11 @@ namespace DeepJeb.Unity.Rendering
                 string fixedCode = FixCodeBraces(codeBuilder.ToString(), codeLanguage);
                 result.Add(new MarkdownLine { Type = LineType.CodeBlock, RichText = fixedCode });
             }
+
+            // Trim leading empty lines only — trailing empty lines provide
+            // visual separation between messages and must be preserved.
+            while (result.Count > 0 && result[0].Type == LineType.Text && string.IsNullOrEmpty(result[0].RichText))
+                result.RemoveAt(0);
 
             return result;
         }
