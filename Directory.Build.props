@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--
+    Shared build configuration for all DeepJeb projects.
+
+    RUNTIME NOTE: DeepJeb runs on KSP's Mono runtime (Unity 2019), NOT the
+    desktop .NET CLR. The Mono version is approximately .NET 4.6 equivalent.
+
+    Compatibility constraints:
+      - Target: net46 (TFM v4.6)
+      - C# 7.0 only — no C# 7.1+ features (Mono lacks some runtime support)
+      - No System.ValueTuple — KSP Managed/ doesn't include it; use classes
+      - No netstandard.dll — KSP doesn't ship the .NET Standard façade;
+        use Newtonsoft.Json 11.0.2 (targets net45 directly, zero façade deps)
+      - All dependency DLLs must be bundled in GameData/DeepJeb/ (or Plugins/)
+  -->
+  <PropertyGroup>
+    <!-- KSP 1.12.5 install root (Unity 2019.2 Mono, .NET 4.6 equivalent) -->
+    <KspDir>E:\KSP_LMP</KspDir>
+    <KspManagedDir>$(KspDir)\KSP_x64_Data\Managed</KspManagedDir>
+    <KspGameDataDir>$(KspDir)\GameData</KspGameDataDir>
+
+    <!-- Build: target .NET 4.6, C# 7.0 (compatible with KSP's Mono) -->
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <LangVersion>7</LangVersion>
+
+    <!-- Deployment: post-build copies to GameData/DeepJeb/ -->
+    <DeepJebDeployDir>$(KspGameDataDir)\DeepJeb</DeepJebDeployDir>
+  </PropertyGroup>
+</Project>

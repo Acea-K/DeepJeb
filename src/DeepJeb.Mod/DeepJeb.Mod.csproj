@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildProjectDirectory)\..\..\Directory.Build.props" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{D4E5F6A7-B8C9-0123-DEF1-234567890123}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>DeepJeb</RootNamespace>
+    <AssemblyName>DeepJeb</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\GameData\DeepJeb\Plugins\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\GameData\DeepJeb\Plugins\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Unity Engine -->
+    <Reference Include="UnityEngine">
+      <HintPath>$(KspManagedDir)\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(KspManagedDir)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <!-- KSP API -->
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(KspManagedDir)\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>$(KspManagedDir)\Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DeepJeb.Core\DeepJeb.Core.csproj">
+      <Project>{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}</Project>
+      <Name>DeepJeb.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DeepJeb.Protocol\DeepJeb.Protocol.csproj">
+      <Project>{B2C3D4E5-F6A7-8901-BCDE-F12345678901}</Project>
+      <Name>DeepJeb.Protocol</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DeepJeb.Unity\DeepJeb.Unity.csproj">
+      <Project>{C3D4E5F6-A7B8-9012-CDEF-123456789012}</Project>
+      <Name>DeepJeb.Unity</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(DeepJebDeployDir)\Plugins" ContinueOnError="true" />
+  </Target>
+  <!-- Copy all DLLs and Skills to GameData after build -->
+  <Target Name="DeployAll" AfterTargets="PostBuild">
+    <ItemGroup>
+      <DependencyDlls Include="$(SolutionDir)GameData\DeepJeb\Plugins\DeepJeb.Core.dll" />
+      <DependencyDlls Include="$(SolutionDir)GameData\DeepJeb\Plugins\DeepJeb.Protocol.dll" />
+      <DependencyDlls Include="$(SolutionDir)GameData\DeepJeb\Plugins\DeepJeb.Unity.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(DependencyDlls)" DestinationFolder="$(DeepJebDeployDir)\Plugins" ContinueOnError="true" />
+
+    <!-- Copy Skills directory (standard Claude SKILL.md documents) -->
+    <ItemGroup>
+      <SkillFiles Include="$(SolutionDir)GameData\DeepJeb\Skills\**\*" />
+    </ItemGroup>
+    <Copy
+      SourceFiles="@(SkillFiles)"
+      DestinationFiles="@(SkillFiles->'$(DeepJebDeployDir)\Skills\%(RecursiveDir)%(Filename)%(Extension)')"
+      ContinueOnError="true"
+      SkipUnchangedFiles="true" />
+
+    <Message Text="Deployed DeepJeb to $(DeepJebDeployDir) (DLLs → Plugins, Skills)" Importance="high" />
+  </Target>
+</Project>
