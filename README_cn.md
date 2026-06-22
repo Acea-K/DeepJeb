@@ -129,6 +129,8 @@ condition: file_exists("MyMod/") -> true
 4. 打开设置，配置 API 服务商和模型
 5. 开始聊天
 
+> **提示：** 按 Enter 发送，**Ctrl+Enter** 或 **Shift+Enter** 换行。
+
 **要求：** KSP 1.12.0+（在 1.12.5 上测试）。无需额外模组或依赖。
 
 ---

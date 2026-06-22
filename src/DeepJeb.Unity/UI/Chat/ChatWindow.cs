@@ -268,10 +268,10 @@ namespace DeepJeb.Unity.UI.Chat
                 _inputFocused = false;
             }
 
-            // Enter = send, Ctrl+Enter = newline. Checked BEFORE TextArea.
+            // Enter = send; Ctrl+Enter / Shift+Enter = newline. Checked BEFORE TextArea.
             if (Event.current != null && Event.current.type == EventType.KeyDown &&
                 (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.KeypadEnter) &&
-                !Event.current.control &&
+                !Event.current.control && !Event.current.shift &&
                 GUI.GetNameOfFocusedControl() == "DeepJeb_Input")
             {
                 SubmitMessage();

@@ -20,6 +20,8 @@
 **Fixes**
 - Settings: model checkbox list scrollable; scrollbar state persisted
 - Loaded session auto-scrolls to bottom
+- Shift+Enter added as newline shortcut (alongside Ctrl+Enter)
+- ClickThroughBlocker compatibility noted in documentation
 
 ## v0.5.1
 

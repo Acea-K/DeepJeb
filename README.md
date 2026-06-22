@@ -129,6 +129,8 @@ Use `file_exists` or `list_directory` tool calls as conditions to gate skill loa
 4. Open Settings to configure an API provider and model
 5. Start chatting
 
+> **Tip:** Press Enter to send, **Ctrl+Enter** or **Shift+Enter** to insert a newline.
+
 **Requirements:** KSP 1.12.0+ (tested on 1.12.5). No additional mods or dependencies required.
 
 ---
