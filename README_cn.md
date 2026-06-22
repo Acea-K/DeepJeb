@@ -141,6 +141,7 @@ condition: file_exists("MyMod/") -> true
 - **KSP 场景切换**：聊天窗口在场景切换时保持存在，但进行中的 AI 生成会在场景加载时停止。
 - **Google Gemini API Key**：由于 Gemini API 使用查询参数方式认证，使用 Alt+F12 调试时 API Key 可能出现在 KSP 的调试控制台日志中。
 - **流式性能**：对于非常长的 AI 回复，逐 token 渲染过程中可能出现轻微的 UI 帧率波动。
+- **ClickThroughBlocker**：如果你安装了 ClickThroughBlocker，可能需要点击两次 DeepJeb 图标才能打开或关闭窗口。这是正常现象——DeepJeb 使用自己的点击穿透检测机制。
 
 ---
 

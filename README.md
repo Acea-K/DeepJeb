@@ -141,6 +141,7 @@ Use `file_exists` or `list_directory` tool calls as conditions to gate skill loa
 - **KSP scene transitions**: The chat window persists across scene changes, but in-progress AI generation is stopped on scene load.
 - **Google Gemini API key**: Due to the Gemini API's query-parameter authentication, the API key may appear in KSP's debug console logs when using Alt+F12 debugging.
 - **Streaming performance**: Very long AI responses may cause minor UI frame-rate fluctuations during token-by-token rendering.
+- **ClickThroughBlocker**: If you have ClickThroughBlocker installed, you may need to click the DeepJeb toolbar icon twice to open or close the window. This is expected — DeepJeb uses its own click-through detection.
 
 ---
 
