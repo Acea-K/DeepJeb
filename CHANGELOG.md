@@ -14,6 +14,9 @@
 - Fixed 400 error on session load — Assistant messages with `tool_calls` no longer saved without Tool results
 - `.craft` file generation restricted
 
+**Skills**
+- Added Realism Overhaul skill
+
 **Fixes**
 - Settings: model checkbox list scrollable; scrollbar state persisted
 - Loaded session auto-scrolls to bottom
