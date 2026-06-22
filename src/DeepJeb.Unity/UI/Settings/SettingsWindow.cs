@@ -46,6 +46,7 @@ namespace DeepJeb.Unity.UI.Settings
 
         private Vector2 _scrollPos;
         private Vector2 _presetScrollPos;
+        private Vector2 _modelScrollPos;
         private int _removeIndex = -1;
         private bool _showAddForm;
         private string _newName = "";
@@ -286,7 +287,7 @@ namespace DeepJeb.Unity.UI.Settings
                     GUI.Box(mcRect, "");
                     float mcContentH = _availableModels.Count * 18f + 4f;
                     Rect mcViewRect = new Rect(0, 0, mcRect.width - 18, mcContentH);
-                    Vector2 mcScroll = GUI.BeginScrollView(mcRect, Vector2.zero, mcViewRect);
+                    _modelScrollPos = GUI.BeginScrollView(mcRect, _modelScrollPos, mcViewRect);
                     float mcY = 2;
                     for (int m = 0; m < _availableModels.Count; m++)
                     {

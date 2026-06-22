@@ -74,8 +74,8 @@ namespace DeepJeb.Unity.UI.Chat
         private Vector2 _scrollPos;
         private bool _showClearConfirm;
         private List<DisplayMessage> _messages = new List<DisplayMessage>();
-        private bool _followBottom = true;  // true = auto-scroll to bottom each frame
-        private float _prevScrollY;         // detect manual scroll-up
+        private int _pendingScrollFrames; // >0 = scroll to bottom for N more frames
+        private float _lastActualH; // Actual rendered height from previous frame
         private DisplayMessage _streamingMsg;    // In-progress streaming assistant message
         private DisplayMessage _toolProgressMsg; // Reusable tool-progress line (Issue 3)
         private DisplayMessage _progressDotsMsg;   // Reference to progress dots message
@@ -217,6 +217,7 @@ namespace DeepJeb.Unity.UI.Chat
                 {
                     Session?.Clear();
                     _messages.Clear();
+                    _lastActualH = 0;
                     _showClearConfirm = false;
                 }
                 if (GUI.Button(new Rect(WindowRect.width - 66, cy + 1, 50, 20), DeepJebLoc.No, HighLogic.Skin.button))
@@ -231,181 +232,20 @@ namespace DeepJeb.Unity.UI.Chat
 
             GUI.Box(msgRect, "");
 
-            // Precise render widths per line type — MUST match the label rects below
-            float viewW = msgRect.width - 18;       // = viewRect.width
-            float wHeading  = viewW - 20;            // indent 0
-            float wText     = viewW - 20 - 12;       // indent 12
-            float wList     = viewW - 20 - 16;       // indent 16
-            float wOrdered  = viewW - 20 - 20;       // indent 20
+            float viewW = msgRect.width - 18;
 
-            // Calculate total content height — MUST match the rendering pass exactly
-            float contentH = 4f; // matches lineY = 4 in rendering
-            foreach (var dm in _messages)
+            // Self-correcting: once measured, use actual height; first frame uses 2× viewport.
+            float contentH = _lastActualH > 0
+                ? Mathf.Max(msgH, _lastActualH + 50f)
+                : Mathf.Max(msgH, msgH * 2f);
+            Rect viewRect = new Rect(0, 0, viewW, contentH);
+            if (_pendingScrollFrames > 0)
             {
-                // Role label (matches GUI.Label at height 18)
-                bool hasLabel = dm.Role == ChatMessage.RoleType.User ||
-                                dm.Role == ChatMessage.RoleType.Assistant ||
-                                dm.Role == ChatMessage.RoleType.System;
-                if (hasLabel) contentH += 18;
-                // Parsed lines
-                foreach (var ml in dm.ParsedLines)
-                {
-                    switch (ml.Type)
-                    {
-                        case MarkdownParser.LineType.Heading1:
-                            contentH += RichStyle.CalcHeight(
-                                new GUIContent("<b><size=18>" + ml.RichText + "</size></b>"),
-                                wHeading) + 2f; break;
-                        case MarkdownParser.LineType.Heading2:
-                            contentH += RichStyle.CalcHeight(
-                                new GUIContent("<b><size=15>" + ml.RichText + "</size></b>"),
-                                wHeading) + 2f; break;
-                        case MarkdownParser.LineType.Heading3:
-                            contentH += RichStyle.CalcHeight(
-                                new GUIContent("<b><size=13>" + ml.RichText + "</size></b>"),
-                                wHeading) + 2f; break;
-                        case MarkdownParser.LineType.Heading4:
-                            contentH += RichStyle.CalcHeight(
-                                new GUIContent("<b><size=11>" + ml.RichText + "</size></b>"),
-                                wHeading) + 2f; break;
-                        case MarkdownParser.LineType.CodeBlock:
-                            contentH += CountLines(ml.RichText) * 16f + 12; break;
-                        case MarkdownParser.LineType.TableRow:
-                            contentH += MaxTableCellHeight(ml, viewW) + 2f; break;
-                        case MarkdownParser.LineType.TableSeparator: contentH += 4; break;
-                        case MarkdownParser.LineType.ListItem:
-                            contentH += RichStyle.CalcHeight(
-                                new GUIContent("• " + ml.RichText), wList) + 2f; break;
-                        case MarkdownParser.LineType.OrderedItem:
-                            contentH += RichStyle.CalcHeight(
-                                new GUIContent(ml.RichText), wOrdered) + 2f; break;
-                        default:
-                            contentH += RichStyle.CalcHeight(
-                                new GUIContent(ml.RichText), wText) + 2f;
-                            break;
-                    }
-                }
-                contentH += 6; // gap after message
-            }
-            // CalcHeight underestimates GUI.Label with <size>/<b>/CJK/emoji.
-            // Only add margin when content exceeds the viewport (scrollbar is active).
-            if (contentH > msgH)
-            {
-                float margin = Mathf.Min(contentH * 0.10f, 200f);
-                contentH += margin;
-            }
-            contentH = Mathf.Max(contentH, msgH);
-
-            Rect viewRect = new Rect(0, 0, msgRect.width - 18, contentH);
-            // Follow-bottom: auto-scroll when new content arrives, stop when
-            // user manually scrolls up to read history.
-            if (_followBottom)
-            {
-                _scrollPos.y = Mathf.Max(0, contentH - msgRect.height + 50f);
+                _scrollPos.y = contentH;
+                _pendingScrollFrames--;
             }
             _scrollPos = GUI.BeginScrollView(msgRect, _scrollPos, viewRect);
-            if (_followBottom && _scrollPos.y < _prevScrollY - 2f)
-            {
-                _followBottom = false; // User scrolled up — release auto-follow
-            }
-            _prevScrollY = _scrollPos.y;
-
-            float lineY = 4;
-            float lineH = 18;
-
-            foreach (var dm in _messages)
-            {
-                // Role label
-                Color roleColor = dm.Role == ChatMessage.RoleType.User ? UserColor :
-                    dm.Role == ChatMessage.RoleType.Assistant ? AiColor :
-                    dm.Role == ChatMessage.RoleType.System ? SystemColor : TextColor;
-
-                string roleLabel = dm.Role == ChatMessage.RoleType.User ? DeepJebLoc.RoleYou :
-                    dm.Role == ChatMessage.RoleType.Assistant ? DeepJebLoc.RoleAi :
-                    dm.Role == ChatMessage.RoleType.System ? DeepJebLoc.RoleSystem : "";
-                if (!string.IsNullOrEmpty(roleLabel))
-                {
-                    // Background strip for role label
-                    GUI.color = new Color(roleColor.r, roleColor.g, roleColor.b, 0.15f);
-                    GUI.Box(new Rect(2, lineY, viewRect.width - 4, lineH + 2), "");
-                    // Role label text
-                    GUI.color = roleColor;
-                    GUI.Label(new Rect(8, lineY, 60, lineH), "<b>" + roleLabel + "</b>", RichStyle);
-                    GUI.color = Color.white;
-                    lineY += lineH + 4;
-                }
-
-                // Render parsed markdown lines
-                foreach (var ml in dm.ParsedLines)
-                {
-                    float indent = 0;
-                    string prefix = "";
-                    string text = ml.RichText;
-
-                    switch (ml.Type)
-                    {
-                        case MarkdownParser.LineType.Heading1:
-                            text = "<b><size=18>" + text + "</size></b>";
-                            lineH = RichStyle.CalcHeight(new GUIContent(text), wHeading);
-                            break;
-                        case MarkdownParser.LineType.Heading2:
-                            text = "<b><size=15>" + text + "</size></b>";
-                            lineH = RichStyle.CalcHeight(new GUIContent(text), wHeading);
-                            break;
-                        case MarkdownParser.LineType.Heading3:
-                            text = "<b><size=13>" + text + "</size></b>";
-                            lineH = RichStyle.CalcHeight(new GUIContent(text), wHeading);
-                            break;
-                        case MarkdownParser.LineType.Heading4:
-                            text = "<b><size=11>" + text + "</size></b>";
-                            lineH = RichStyle.CalcHeight(new GUIContent(text), wHeading);
-                            break;
-                        case MarkdownParser.LineType.ListItem:
-                            indent = 16; prefix = "• ";
-                            lineH = RichStyle.CalcHeight(new GUIContent(prefix + text), wList);
-                            break;
-                        case MarkdownParser.LineType.OrderedItem:
-                            indent = 20;
-                            lineH = RichStyle.CalcHeight(new GUIContent(text), wOrdered);
-                            break;
-                        case MarkdownParser.LineType.CodeBlock:
-                            GUI.color = new Color(0.12f, 0.12f, 0.16f);
-                            GUI.Box(new Rect(4, lineY, viewRect.width - 8,
-                                CountLines(text) * 16f + 8), "");
-                            GUI.color = CodeColor;
-                            float cbY = lineY + 4;
-                            foreach (var codeLine in text.Split('\n'))
-                            {
-                                GUI.Label(new Rect(12, cbY, viewRect.width - 24, 16),
-                                    codeLine.Replace("<", "<​").Replace(">", ">​"), RichStyle);
-                                cbY += 16;
-                            }
-                            GUI.color = Color.white;
-                            lineY += CountLines(text) * 16f + 12;
-                            continue;
-                        case MarkdownParser.LineType.TableRow:
-                            RenderTableRow(ml, ref lineY, viewRect.width, RichStyle);
-                            continue;
-                        case MarkdownParser.LineType.TableSeparator:
-                            lineY += 4;
-                            continue;
-                        default:
-                            indent = 12;
-                            lineH = 18;
-                            break;
-                    }
-
-                    if (ml.Type == MarkdownParser.LineType.Text)
-                        lineH = RichStyle.CalcHeight(new GUIContent(text), wText);
-
-                    GUI.color = Color.white;
-                    GUI.Label(new Rect(8 + indent, lineY, viewRect.width - 20 - indent, lineH + 2),
-                        prefix + text, RichStyle);
-                    lineY += lineH + 2;
-                }
-                lineY += 6; // gap between messages
-            }
-            GUI.color = Color.white;
+            _lastActualH = RenderAllMessagesInternal(4, viewW, true);
             GUI.EndScrollView();
 
             y += msgH + 2;
@@ -579,7 +419,7 @@ namespace DeepJeb.Unity.UI.Chat
                     new MarkdownParser.MarkdownLine { RichText = text }
                 }
             });
-            _followBottom = true;
+            _pendingScrollFrames = 1;
 
             if (OnSendMessage != null)
             {
@@ -595,7 +435,7 @@ namespace DeepJeb.Unity.UI.Chat
                     AddAiResponse(response);
                 }
                 // Async (streaming): dots stay until first token arrives, or user stops generation.
-                _followBottom = true;
+                _pendingScrollFrames = 1;
             }
         }
 
@@ -699,7 +539,7 @@ namespace DeepJeb.Unity.UI.Chat
                 Type = MarkdownParser.LineType.Text,
                 RichText = MarkdownParser.EscapeRichText(partialText)
             });
-            _followBottom = true;
+            _pendingScrollFrames = 1;
         }
 
         /// <summary>Finalize current streaming round: full markdown parse, clear tool progress.</summary>
@@ -716,7 +556,7 @@ namespace DeepJeb.Unity.UI.Chat
             }
             _streamingMsg = null;
             TrimDisplayMessages();
-            _followBottom = true;
+            _pendingScrollFrames = 1;
         }
 
         public void AddAiResponse(string text)
@@ -772,6 +612,7 @@ namespace DeepJeb.Unity.UI.Chat
             _messages.Clear();
             _streamingMsg = null;
             _toolProgressMsg = null;
+            _lastActualH = 0;
             foreach (var msg in messages)
             {
                 // Never display System or Tool messages — they belong in AI context only.
@@ -785,7 +626,7 @@ namespace DeepJeb.Unity.UI.Chat
                 };
                 _messages.Add(displayMsg);
             }
-            _followBottom = true;
+            _pendingScrollFrames = 3; // Need multiple frames: _lastActualH stabilizes after 1
         }
 
         /// <summary>Add or update the tool-progress line (reuses single message).</summary>
@@ -809,7 +650,7 @@ namespace DeepJeb.Unity.UI.Chat
                 Type = MarkdownParser.LineType.Text,
                 RichText = "<color=#0891B2>" + text + "</color>"
             });
-            _followBottom = true;
+            _pendingScrollFrames = 1;
         }
 
         private string GetContextUsage()
@@ -862,7 +703,7 @@ namespace DeepJeb.Unity.UI.Chat
         /// <summary>Force a redraw (call after external state changes).</summary>
         public void RequestRedraw()
         {
-            _followBottom = true;
+            _pendingScrollFrames = 1;
         }
 
         private void RenderTableRow(MarkdownParser.MarkdownLine ml, ref float y, float maxW, GUIStyle style)
@@ -905,24 +746,154 @@ namespace DeepJeb.Unity.UI.Chat
             return c;
         }
 
-        /// <summary>Compute max cell height for a table row (shared by measurement + rendering).</summary>
-        private static float MaxTableCellHeight(MarkdownParser.MarkdownLine ml, float tableWidth)
+        /// <summary>
+        /// Render all display messages starting at the given Y offset.
+        /// Returns the final lineY after rendering. Used for both offscreen
+        /// measurement (pass 1) and visible rendering (pass 2).
+        /// </summary>
+        private float RenderAllMessagesInternal(float startY, float viewW, bool visible)
+        {
+            float lineY = startY;
+            float lineH = 18;
+
+            foreach (var dm in _messages)
+            {
+                // Skip all System messages except tool progress and progress dots
+                if (dm.Role == ChatMessage.RoleType.System &&
+                    dm != _toolProgressMsg && dm != _progressDotsMsg)
+                    continue;
+
+                Color roleColor = dm.Role == ChatMessage.RoleType.User ? UserColor :
+                    dm.Role == ChatMessage.RoleType.Assistant ? AiColor : TextColor;
+
+                string roleLabel = dm.Role == ChatMessage.RoleType.User ? DeepJebLoc.RoleYou :
+                    dm.Role == ChatMessage.RoleType.Assistant ? DeepJebLoc.RoleAi : "";
+                if (!string.IsNullOrEmpty(roleLabel))
+                {
+                    float labelH = 18; // Fixed — not dependent on stale lineH from previous msg
+                    if (visible)
+                    {
+                        GUI.color = new Color(roleColor.r, roleColor.g, roleColor.b, 0.15f);
+                        GUI.Box(new Rect(2, lineY, viewW - 4, labelH + 2), "");
+                        GUI.color = roleColor;
+                        GUI.Label(new Rect(8, lineY, 60, labelH), "<b>" + roleLabel + "</b>", RichStyle);
+                        GUI.color = Color.white;
+                    }
+                    lineY += labelH + 4;
+                }
+
+                foreach (var ml in dm.ParsedLines)
+                {
+                    float indent = 0;
+                    string prefix = "";
+                    string text = ml.RichText;
+
+                    switch (ml.Type)
+                    {
+                        case MarkdownParser.LineType.Heading1:
+                            text = "<b><size=18>" + text + "</size></b>";
+                            lineH = RichStyle.CalcHeight(new GUIContent(text), viewW - 20);
+                            break;
+                        case MarkdownParser.LineType.Heading2:
+                            text = "<b><size=15>" + text + "</size></b>";
+                            lineH = RichStyle.CalcHeight(new GUIContent(text), viewW - 20);
+                            break;
+                        case MarkdownParser.LineType.Heading3:
+                            text = "<b><size=13>" + text + "</size></b>";
+                            lineH = RichStyle.CalcHeight(new GUIContent(text), viewW - 20);
+                            break;
+                        case MarkdownParser.LineType.Heading4:
+                            text = "<b><size=11>" + text + "</size></b>";
+                            lineH = RichStyle.CalcHeight(new GUIContent(text), viewW - 20);
+                            break;
+                        case MarkdownParser.LineType.ListItem:
+                            indent = 16; prefix = "• ";
+                            lineH = RichStyle.CalcHeight(new GUIContent(prefix + text), viewW - 20 - 16);
+                            break;
+                        case MarkdownParser.LineType.OrderedItem:
+                            indent = 20;
+                            lineH = RichStyle.CalcHeight(new GUIContent(text), viewW - 20 - 20);
+                            break;
+                        case MarkdownParser.LineType.CodeBlock:
+                            {
+                                float codeH = 0;
+                                var codeLines = text.Split('\n');
+                                foreach (var cl in codeLines)
+                                    codeH += RichStyle.CalcHeight(
+                                        new GUIContent(cl.Replace("<", "<​").Replace(">", ">​")),
+                                        viewW - 24);
+                                if (visible)
+                                {
+                                    GUI.color = new Color(0.12f, 0.12f, 0.16f);
+                                    GUI.Box(new Rect(4, lineY, viewW - 8, codeH + 8), "");
+                                    GUI.color = CodeColor;
+                                    float cbY = lineY + 4;
+                                    foreach (var codeLine in codeLines)
+                                    {
+                                        float lh = RichStyle.CalcHeight(
+                                            new GUIContent(codeLine.Replace("<", "<​").Replace(">", ">​")),
+                                            viewW - 24);
+                                        GUI.Label(new Rect(12, cbY, viewW - 24, lh),
+                                            codeLine.Replace("<", "<​").Replace(">", ">​"), RichStyle);
+                                        cbY += lh;
+                                    }
+                                    GUI.color = Color.white;
+                                }
+                                lineY += codeH + 12;
+                                continue;
+                            }
+                        case MarkdownParser.LineType.TableRow:
+                            if (visible)
+                                RenderTableRow(ml, ref lineY, viewW, RichStyle);
+                            else
+                                lineY += MeasureTableRow(ml, viewW);
+                            continue;
+                        case MarkdownParser.LineType.HorizontalRule:
+                            if (visible)
+                            {
+                                GUI.color = new Color(0.4f, 0.4f, 0.5f);
+                                GUI.Box(new Rect(8, lineY + 2, viewW - 16, 1), "");
+                                GUI.color = Color.white;
+                            }
+                            lineY += 10;
+                            continue;
+                        case MarkdownParser.LineType.TableSeparator:
+                            lineY += 4;
+                            continue;
+                        default:
+                            indent = 12;
+                            lineH = RichStyle.CalcHeight(new GUIContent(text), viewW - 20 - 12);
+                            break;
+                    }
+
+                    if (visible)
+                    {
+                        GUI.color = Color.white;
+                        GUI.Label(new Rect(8 + indent, lineY, viewW - 20 - indent, lineH + 2),
+                            prefix + text, RichStyle);
+                    }
+                    lineY += lineH + 2;
+                }
+                lineY += 6;
+            }
+            return lineY;
+        }
+
+        private float MeasureTableRow(MarkdownParser.MarkdownLine ml, float maxW)
         {
             if (ml.TableCells == null || ml.TableCells.Length == 0) return 18;
             int n = ml.TableCells.Length;
-            float cellW = (tableWidth - 24) / n;
-            float maxH = 0;
-            // Use a disposable GUIStyle with richText for CalcHeight
-            var style = new GUIStyle(HighLogic.Skin.label) { richText = true };
+            float cellW = (maxW - 24) / n;
+            float rowH = 0;
             for (int i = 0; i < n; i++)
             {
-                string cellText = ml.IsTableHeader
+                string ct = ml.IsTableHeader
                     ? "<b>" + (ml.TableCells[i] ?? "") + "</b>"
                     : (ml.TableCells[i] ?? "");
-                float ch = style.CalcHeight(new GUIContent(cellText), cellW);
-                if (ch > maxH) maxH = ch;
+                float ch = RichStyle.CalcHeight(new GUIContent(ct), cellW);
+                if (ch > rowH) rowH = ch;
             }
-            return maxH < 18 ? 18 : maxH;
+            return (rowH < 18 ? 18 : rowH) + 2;
         }
     }
 }

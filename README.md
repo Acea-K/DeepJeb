@@ -34,7 +34,7 @@ DeepJeb ships with a comprehensive **KSP world knowledge base**: game mechanics,
 
 ## What Can It Do?
 
-DeepJeb comes with **5 built-in knowledge bases** (Claude Skills) and **7 file-system tools** the AI can use.
+DeepJeb comes with **6 built-in knowledge bases** (Claude Skills) and **7 file-system tools** the AI can use.
 
 ### Knowledge Bases (Skills)
 
@@ -45,6 +45,7 @@ DeepJeb comes with **5 built-in knowledge bases** (Claude Skills) and **7 file-s
 | **kOS Programming** | KerboScript language reference, flight control, maneuver nodes, boot files, triggers |
 | **kRPC Programming** | Architecture, Python/C#/Lua client APIs, SpaceCenter, AutoPilot, vessel control, streaming data |
 | **MechJeb** | All guidance modules, career integration, real-time value modification via kRPC/kOS |
+| **Realism Overhaul** | Comprehensive RO/RP-1/RSS mod suite — 68 repos, installation, parts, engines, life support, historical spacecraft, troubleshooting |
 
 Skills are matched automatically by keyword overlap with your question — the top 2 hits are injected as context.
 

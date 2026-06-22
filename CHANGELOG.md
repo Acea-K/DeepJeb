@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.5.2
+
+**Streaming & Rendering**
+- Scroll height system rewritten: self-correcting actual-rendered-height feedback replaces CalcHeight measurement — zero approximation
+- Code blocks use per-line `CalcHeight` instead of fixed 16px (CJK/box-drawing chars now correctly measured)
+- Horizontal rule (`---` / `***` / `___`) recognized and rendered as separator line
+- Role label height fixed at 18px (was leaking stale `lineH` from previous message)
+
+**Session & Security**
+- System prompt zero-storage: never saved to session file, injected fresh at conversation start
+- Session load: strips all old System messages, prepends current prompt, immediately usable
+- Fixed 400 error on session load — Assistant messages with `tool_calls` no longer saved without Tool results
+- `.craft` file generation restricted
+
+**Fixes**
+- Settings: model checkbox list scrollable; scrollbar state persisted
+- Loaded session auto-scrolls to bottom
+
 ## v0.5.1
 
 **Display & Markdown**

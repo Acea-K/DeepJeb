@@ -33,7 +33,7 @@ ls -d <KSP_ROOT>/GameData/kOS 2>/dev/null && echo "kOS installed" || echo "kOS N
 Test-Path "<KSP_ROOT>\GameData\kOS" -PathType Container
 ```
 
-> This .skill file is a structured world knowledge base for LLM retrieval. It is NOT installed as a Hermes Agent skill. For general KSP game mechanics, see ksp-world-knowledge.skill. For MechJeb (autopilot mod), see mechjeb.skill.
+> This .skill file is a structured world knowledge base for LLM retrieval. For general KSP game mechanics, see ksp-world-knowledge.skill. For MechJeb (autopilot mod), see mechjeb.skill.
 
 ---
 

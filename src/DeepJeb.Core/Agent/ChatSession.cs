@@ -110,10 +110,10 @@ namespace DeepJeb.Core.Agent
         /// </summary>
         public void Clear()
         {
-            var systemMsgs = Messages.FindAll(m => m.Role == ChatMessage.RoleType.System);
             Messages.Clear();
-            if (systemMsgs.Count > 0)
-                Messages.AddRange(systemMsgs);
+            // Inject fresh system prompt at conversation start
+            if (!string.IsNullOrEmpty(_pipeline.SystemPrompt))
+                Messages.Add(ChatMessage.CreateSystem(_pipeline.SystemPrompt));
             LastError = null;
             _pipeline.ResetSecurity();
         }

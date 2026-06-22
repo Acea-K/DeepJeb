@@ -31,7 +31,7 @@ applies_when: "always"
 
 # KSP World Knowledge — Kerbal Space Program
 
-> This .skill file is a structured world knowledge base for LLM retrieval. It is NOT installed as a Hermes Agent skill.
+> This .skill file is a structured world knowledge base for LLM retrieval.
 
 ---
 

@@ -35,7 +35,7 @@ ls -d <KSP_ROOT>/GameData/kRPC 2>/dev/null && echo "kRPC installed" || echo "kRP
 Test-Path "<KSP_ROOT>\GameData\kRPC" -PathType Container
 ```
 
-> This .skill file is a structured world knowledge base for LLM retrieval. It is NOT installed as a Hermes Agent skill. For general KSP game mechanics, see ksp-world-knowledge.skill. For kOS scripting, see kos-programming.skill. For MechJeb integration, see mechjeb.skill.
+> This .skill file is a structured world knowledge base for LLM retrieval. For general KSP game mechanics, see ksp-world-knowledge.skill. For kOS scripting, see kos-programming.skill. For MechJeb integration, see mechjeb.skill.
 
 ---
 

@@ -616,24 +616,14 @@ namespace DeepJeb
             if (_sessionStore == null || ChatSession == null) return;
             try
             {
-                // Filter out injected system messages and tool results before saving.
-                // Only keep: first System msg (identity prompt), all User msgs, all Assistant msgs.
+                // System prompt is injected at conversation start — never persist it.
+                // Skip ALL System and Tool messages; keep only User and Assistant.
                 var filtered = new List<ChatMessage>();
-                bool keptFirstSystem = false;
                 foreach (var m in ChatSession.Messages)
                 {
-                    if (m.Role == ChatMessage.RoleType.Tool)
-                        continue; // Skip tool results entirely
-                    if (m.Role == ChatMessage.RoleType.System)
-                    {
-                        if (!keptFirstSystem)
-                        {
-                            filtered.Add(m);
-                            keptFirstSystem = true;
-                        }
-                        // Skip injected [KNOWLEDGE:...], [REF:...], and AgentLoop prompts
-                        continue;
-                    }
+                    if (m.Role == ChatMessage.RoleType.System) continue;
+                    if (m.Role == ChatMessage.RoleType.Tool) continue;
+                    if (m.ToolCalls != null && m.ToolCalls.Count > 0) continue;
                     filtered.Add(m);
                 }
                 _sessionStore.Save(new SessionData
@@ -661,14 +651,12 @@ namespace DeepJeb
             var data = _sessionStore.Load(sessionId);
             if (data == null) return;
 
-            ChatSession.Messages = data.Messages ?? new List<ChatMessage>();
-
-            // Replace any old system prompt with the current pipeline version.
-            // Old prompts may lack critical rules (emoji ban, MM patch restrictions, etc.).
-            if (ChatSession.Messages.Count > 0 && ChatSession.Messages[0].Role == ChatMessage.RoleType.System)
-            {
-                ChatSession.Messages[0] = ChatMessage.CreateSystem(ChatPipeline?.SystemPrompt ?? "");
-            }
+            // Strip all old System messages — system prompt is injected fresh.
+            var msgs = data.Messages ?? new List<ChatMessage>();
+            msgs.RemoveAll(m => m.Role == ChatMessage.RoleType.System);
+            // Prepend the current system prompt
+            msgs.Insert(0, ChatMessage.CreateSystem(ChatPipeline?.SystemPrompt ?? ""));
+            ChatSession.Messages = msgs;
 
             // Switch to the loaded session's provider. If the provider no longer
             // exists, keep the current client to avoid client/model mismatch (400).
@@ -678,22 +666,20 @@ namespace DeepJeb
 
             if (switched && !string.IsNullOrEmpty(data.ModelName))
             {
-                // Only use the loaded model if it's available for this provider
                 var cfg = _providers.Find(p => p.Name == data.ProviderName);
                 if (cfg != null && cfg.EnabledModels != null && cfg.EnabledModels.Contains(data.ModelName))
                     _activeModel = data.ModelName;
-                // else: keep the provider's default model (set by SwitchToProvider)
             }
 
             ChatSession.ProviderName = data.ProviderName;
             ChatSession.ModelName = data.ModelName;
 
-            // Rebuild display (System messages are filtered out at render time)
             if (_chatWindow != null)
             {
                 _chatWindow.ProviderName = data.ProviderName;
                 _chatWindow.ModelName = data.ModelName;
                 _chatWindow.RebuildDisplayFromMessages(ChatSession.Messages);
+                SyncProviderLists();
             }
             Debug.Log("[DeepJeb] Session loaded: " + sessionId);
         }

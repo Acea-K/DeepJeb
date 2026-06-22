@@ -13,7 +13,7 @@ namespace DeepJeb.Unity.Rendering
     /// </summary>
     public class MarkdownParser
     {
-        public enum LineType { Text, Heading1, Heading2, Heading3, Heading4, CodeBlock, ListItem, OrderedItem, TableRow, TableSeparator }
+        public enum LineType { Text, Heading1, Heading2, Heading3, Heading4, HorizontalRule, CodeBlock, ListItem, OrderedItem, TableRow, TableSeparator }
 
         public struct MarkdownLine
         {
@@ -68,6 +68,14 @@ namespace DeepJeb.Unity.Rendering
                 if (string.IsNullOrEmpty(trimmed))
                 {
                     result.Add(new MarkdownLine { Type = LineType.Text, RichText = "" });
+                    continue;
+                }
+
+                // Horizontal rule: 3+ hyphens/asterisks/underscores, optional spaces
+                if (System.Text.RegularExpressions.Regex.IsMatch(trimmed, @"^(-{3,}|_{3,}|\*{3,})$") ||
+                    System.Text.RegularExpressions.Regex.IsMatch(trimmed, @"^(- | -)*---( -| -)*$"))
+                {
+                    result.Add(new MarkdownLine { Type = LineType.HorizontalRule });
                     continue;
                 }
 
