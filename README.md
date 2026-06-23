@@ -6,14 +6,14 @@
 
 <p align="center">
   <strong>AI Assistant for Kerbal Space Program</strong><br>
-  An in-game AI chat window that reads, writes, and helps you build.<br>
+  An in-game AI/LLM chat window that reads, writes, and helps you build.<br>
   <em>KSP 1.12.5 · Unity 2019.2 · C# 7.3 · Zero Dependencies</em>
 </p>
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
   <a href="#"><img src="https://img.shields.io/badge/KSP-1.12.5-blue" alt="KSP 1.12.5"></a>
-  <a href="#"><img src="https://img.shields.io/badge/version-0.5.0-green" alt="v0.5.0"></a>
+  <a href="#"><img src="https://img.shields.io/badge/version-0.5.2-green" alt="v0.5.2"></a>
 </p>
 
 <p align="center">

@@ -6,14 +6,14 @@
 
 <p align="center">
   <strong>Kerbal Space Program AI 助手</strong><br>
-  一个内嵌于游戏中的 AI 聊天窗口，能读、能写、能帮你建造。<br>
+  一个内嵌于游戏中的 AI/LLM 聊天窗口，能读、能写、能帮你建造。<br>
   <em>KSP 1.12.5 · Unity 2019.2 · C# 7.3 · 零依赖</em>
 </p>
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
   <a href="#"><img src="https://img.shields.io/badge/KSP-1.12.5-blue" alt="KSP 1.12.5"></a>
-  <a href="#"><img src="https://img.shields.io/badge/version-0.5.0-green" alt="v0.5.0"></a>
+  <a href="#"><img src="https://img.shields.io/badge/version-0.5.2-green" alt="v0.5.2"></a>
 </p>
 
 <p align="center">
