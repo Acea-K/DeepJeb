@@ -29,6 +29,8 @@ DeepJeb 将 AI 聊天窗口直接嵌入 KSP。你可以让它编写 Module Manag
 DeepJeb 内置了全面的 **KSP 世界知识库**：游戏机制、轨道物理学（开普勒定律、delta-V、引力弹弓）、所有原版天体的参数、航天器设计原则、DLC 内容、模组开发惯例和社区资源。但它真正的威力在于**技能系统**——你可以将任何 `SKILL.md` 文档放入 `Skills/` 文件夹，AI 就会将其加载为领域知识。教它你最喜欢的模组、你的自定义行星包，或者你个人的建造规范。技能格式是开放且有文档的——你的专业知识，你的规则。
 
 > **你需要自备 API Key。** DeepJeb 不包含也不提供任何 AI 服务——你将它连接到你自己的 OpenAI、Anthropic、Google Gemini、DeepSeek 或其他兼容的 API 账户。所有 API 流量直接从你的机器发送到你配置的提供商。你也可以将其指向本地部署的大语言模型（通过 Ollama、vLLM 或任何兼容 OpenAI 接口的端点），将一切完全掌控在自己手中。
+>
+> **API Key 如何存储。** 内存中，密钥以明文形式保存（API 认证所需）。磁盘上，密钥使用 XOR 混淆与 Base64 编码加密——配置文件从不写入明文密钥。OpenAI 和 Anthropic 的密钥通过 HTTP Bearer token 头发送，KSP 调试控制台不会记录。Google Gemini API 是例外——请参阅下方已知问题。
 
 ---
 
@@ -141,7 +143,7 @@ condition: file_exists("MyMod/") -> true
 - **上下文截断**：当接近模型的上下文窗口限制时，过长的对话可能会丢失较早的消息。长时间会话建议定期使用 `/clear`。
 - **UI 缩放**：聊天窗口使用固定像素尺寸（默认 600×500）。在非常小或非常大的屏幕上，布局可能无法理想缩放。
 - **KSP 场景切换**：聊天窗口在场景切换时保持存在，但进行中的 AI 生成会在场景加载时停止。
-- **Google Gemini API Key**：由于 Gemini API 使用查询参数方式认证，使用 Alt+F12 调试时 API Key 可能出现在 KSP 的调试控制台日志中。
+- **Google Gemini API Key**：Gemini API 要求将 API Key 作为 URL 查询参数传递（这是 Google 的设计，并非 DeepJeb 的选择）。因此，如果你使用 Google Gemini 提供商，你的 API Key **可能以明文形式**出现在 KSP 的调试控制台日志中（Alt+F12 调试时可见）。OpenAI 和 Anthropic 的密钥通过 HTTP 头发送，不会被记录。
 - **流式性能**：对于非常长的 AI 回复，逐 token 渲染过程中可能出现轻微的 UI 帧率波动。
 - **ClickThroughBlocker**：如果你安装了 ClickThroughBlocker，可能需要点击两次 DeepJeb 图标才能打开或关闭窗口。这是正常现象——DeepJeb 使用自己的点击穿透检测机制。
 

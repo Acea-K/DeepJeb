@@ -29,6 +29,8 @@ DeepJeb embeds an AI chat window directly inside KSP. Ask it anything — write 
 DeepJeb ships with a comprehensive **KSP world knowledge base**: game mechanics, orbital physics (Kepler's laws, delta-V, gravity assists), all stock celestial bodies, spacecraft design principles, DLC content, modding conventions, and community resources. But its real power is the **skill system** — you can drop any `SKILL.md` document into the `Skills/` folder and the AI will load it as domain knowledge. Teach it about your favorite mod, your custom planet pack, or your personal build conventions. The skill format is open and documented — your expertise, your rules.
 
 > **You need your own API key.** DeepJeb does not include or provide any AI service — you connect it to your own OpenAI, Anthropic, Google Gemini, DeepSeek, or other compatible API account. All API traffic goes directly from your machine to the provider you configure. You can also point it at a locally deployed LLM (via Ollama, vLLM, or any OpenAI-compatible endpoint) to keep everything fully under your own control.
+>
+> **How your API key is stored.** In memory, your key is held in plaintext (required for API authentication). On disk, keys are encrypted using XOR obfuscation with Base64 encoding — they are never written to the config file in plaintext. For OpenAI and Anthropic, API keys are sent as HTTP Bearer token headers which KSP's debug console does not log. The Google Gemini API is the exception — see Known Issues below.
 
 ---
 
@@ -141,7 +143,7 @@ Use `file_exists` or `list_directory` tool calls as conditions to gate skill loa
 - **Context truncation**: Very long conversations may lose earlier messages when approaching the model's context window limit. Use `/clear` periodically for long sessions.
 - **UI scaling**: The chat window uses fixed pixel dimensions (600×500 default). On very small or very large screens, the layout may not scale ideally.
 - **KSP scene transitions**: The chat window persists across scene changes, but in-progress AI generation is stopped on scene load.
-- **Google Gemini API key**: Due to the Gemini API's query-parameter authentication, the API key may appear in KSP's debug console logs when using Alt+F12 debugging.
+- **Google Gemini API key**: The Gemini API requires the API key to be passed as a URL query parameter (this is Google's design, not a DeepJeb choice). As a result, if you use the Google Gemini provider, your API key **may appear in plaintext** in KSP's debug console logs when using Alt+F12 debugging. Keys for OpenAI and Anthropic are sent as HTTP headers and are not logged.
 - **Streaming performance**: Very long AI responses may cause minor UI frame-rate fluctuations during token-by-token rendering.
 - **ClickThroughBlocker**: If you have ClickThroughBlocker installed, you may need to click the DeepJeb toolbar icon twice to open or close the window. This is expected — DeepJeb uses its own click-through detection.
 
