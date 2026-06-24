@@ -13,7 +13,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
   <a href="#"><img src="https://img.shields.io/badge/KSP-1.12.5-blue" alt="KSP 1.12.5"></a>
-  <a href="#"><img src="https://img.shields.io/badge/version-0.5.3-green" alt="v0.5.3"></a>
+  <a href="#"><img src="https://img.shields.io/badge/version-0.5.3.1-green" alt="v0.5.3.1"></a>
 </p>
 
 <p align="center">

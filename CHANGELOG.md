@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.5.3.1
+
+- Added `craft` to brace auto-completion language set (code blocks tagged ` ```craft ` or auto-detected by `PART`/`ship =` now get bracket auto-close)
+
 ## v0.5.3
 
 - Completed localization entries for Settings form, model dropdown, and connection status

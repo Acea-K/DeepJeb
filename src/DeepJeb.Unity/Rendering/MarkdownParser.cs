@@ -260,7 +260,7 @@ namespace DeepJeb.Unity.Rendering
         {
             "c", "cpp", "c++", "c#", "csharp", "cs", "java", "javascript", "js",
             "typescript", "ts", "rust", "go", "swift", "kotlin", "scala", "dart",
-            "kos", "kerboscript", "mm", "modulemanager", "patch", "cfg",
+            "kos", "kerboscript", "mm", "modulemanager", "patch", "cfg", "craft",
             "py", "python", "python3", "rb", "ruby", "lua"
         };
 
@@ -273,7 +273,8 @@ namespace DeepJeb.Unity.Rendering
                 // Detect MM patch / KSP config by characteristic operators
                 string trimmed = code.TrimStart();
                 if (trimmed.Contains("@PART[") || trimmed.Contains("@RESOURCE[") ||
-                    trimmed.Contains("HAS[") || trimmed.StartsWith("@"))
+                    trimmed.Contains("HAS[") || trimmed.StartsWith("@") ||
+                    trimmed.StartsWith("PART") || trimmed.StartsWith("ship ="))
                     shouldFix = true;
             }
             if (!shouldFix)
