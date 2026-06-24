@@ -158,6 +158,8 @@ Copyright © 2026 Acea - vibe coded using Claude Code / DeepSeek V4 Pro
 
 MiniJSON based on the public-domain implementation by Calvin Rien.
 
+The three Python files in the `ksp-craft-files` skill (`ksparser.py`, `import_craft.py`, `part_dict.py`) are derived from [io_kspblender](https://github.com/spencerarrasmith/io_kspblender) by Spencer Arrasmith, licensed under [GPL-2.0](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html). They are included for reference and demonstration only.
+
 ---
 
 <p align="center">

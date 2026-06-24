@@ -158,6 +158,8 @@ Copyright © 2026 Acea - 使用 Claude Code / DeepSeek V4 Pro 开发
 
 MiniJSON 基于 Calvin Rien 的公有领域实现。
 
+`ksp-craft-files` 技能中的三个 Python 文件（`ksparser.py`、`import_craft.py`、`part_dict.py`）源自 Spencer Arrasmith 的 [io_kspblender](https://github.com/spencerarrasmith/io_kspblender) 项目，基于 [GPL-2.0](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html) 许可证发布，仅在技能中作为引用和示例。
+
 ---
 
 <p align="center">
