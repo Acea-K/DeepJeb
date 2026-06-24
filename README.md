@@ -13,7 +13,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
   <a href="#"><img src="https://img.shields.io/badge/KSP-1.12.5-blue" alt="KSP 1.12.5"></a>
-  <a href="#"><img src="https://img.shields.io/badge/version-0.5.2-green" alt="v0.5.2"></a>
+  <a href="#"><img src="https://img.shields.io/badge/version-0.5.3-green" alt="v0.5.3"></a>
 </p>
 
 <p align="center">
@@ -36,13 +36,14 @@ DeepJeb ships with a comprehensive **KSP world knowledge base**: game mechanics,
 
 ## What Can It Do?
 
-DeepJeb comes with **6 built-in knowledge bases** (Claude Skills) and **7 file-system tools** the AI can use.
+DeepJeb comes with **7 built-in knowledge bases** (Claude Skills) and **7 file-system tools** the AI can use.
 
 ### Knowledge Bases (Skills)
 
 | Skill | Description |
 |-------|-------------|
 | **KSP World Knowledge** | Stock game mechanics, orbital physics, celestial bodies, spacecraft design, DLC content, modding tips, community resources |
+| **KSP Craft Files** | .craft file format, PART fields, quaternion rotation, attachment nodes, mirror symmetry, radial sizes, stock part reference, parser tools, troubleshooting |
 | **Module Manager** | MM patch syntax, operators, ordering directives, NEEDS/DEPENDS checking, variables, common patterns |
 | **kOS Programming** | KerboScript language reference, flight control, maneuver nodes, boot files, triggers |
 | **kRPC Programming** | Architecture, Python/C#/Lua client APIs, SpaceCenter, AutoPilot, vessel control, streaming data |

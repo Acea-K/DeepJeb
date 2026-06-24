@@ -603,7 +603,7 @@ namespace DeepJeb
             else if (pipelineResult != null && !pipelineResult.Success)
             {
                 _chatWindow?.AddAiResponse(DeepJebLoc.ErrorPrefix + " " +
-                    (pipelineResult.ErrorMessage ?? "Unknown error"));
+                    (pipelineResult.ErrorMessage ?? DeepJebLoc.UnknownError));
             }
             else if (!string.IsNullOrEmpty(ChatSession.LastError))
                 _chatWindow?.AddAiResponse(DeepJebLoc.ErrorPrefix + " " + ChatSession.LastError);

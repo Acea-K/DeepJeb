@@ -13,7 +13,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
   <a href="#"><img src="https://img.shields.io/badge/KSP-1.12.5-blue" alt="KSP 1.12.5"></a>
-  <a href="#"><img src="https://img.shields.io/badge/version-0.5.2-green" alt="v0.5.2"></a>
+  <a href="#"><img src="https://img.shields.io/badge/version-0.5.3-green" alt="v0.5.3"></a>
 </p>
 
 <p align="center">
@@ -36,13 +36,14 @@ DeepJeb 内置了全面的 **KSP 世界知识库**：游戏机制、轨道物理
 
 ## 能做什么？
 
-DeepJeb 自带 **6 个内置知识库**（Claude 技能）和 **7 个文件系统工具**，AI 可以直接使用。
+DeepJeb 自带 **7 个内置知识库**（Claude 技能）和 **7 个文件系统工具**，AI 可以直接使用。
 
 ### 知识库（技能）
 
 | 技能 | 描述 |
 |------|------|
 | **KSP 世界知识** | 原版游戏机制、轨道物理学、天体数据、航天器设计、DLC 内容、模组开发技巧、社区资源 |
+| **KSP 载具文件** | .craft 文件格式、PART 字段、四元数旋转、连接节点、镜像对称、径向尺寸标准、原版部件参考、解析工具、故障排查 |
 | **Module Manager** | MM 补丁语法、运算符、排序指令、NEEDS/DEPENDS 检查、变量、常用模式 |
 | **kOS 编程** | KerboScript 语言参考、飞行控制、机动节点、启动文件、触发器 |
 | **kRPC 编程** | 架构、Python/C#/Lua 客户端 API、SpaceCenter、AutoPilot、飞船控制、流式数据 |

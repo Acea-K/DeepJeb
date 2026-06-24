@@ -112,7 +112,7 @@ namespace DeepJeb.Unity.UI.Settings
 
                 if (ok)
                 {
-                    _connectionStatus = "✓ Connected";
+                    _connectionStatus = DeepJebLoc.ConnectionSuccess;
                     // Fetch available models
                     try
                     {
@@ -123,7 +123,7 @@ namespace DeepJeb.Unity.UI.Settings
                 }
                 else
                 {
-                    _connectionStatus = "✗ Failed";
+                    _connectionStatus = DeepJebLoc.ConnectionFailed;
                 }
             }
             catch
@@ -220,7 +220,7 @@ namespace DeepJeb.Unity.UI.Settings
                 // Left: scrollable preset list
                 float presetH = formH - 40f;
                 Rect presetRect = new Rect(12, y + 22, 150, presetH);
-                GUI.Label(new Rect(12, y + 4, 150, 18), "Presets:", HighLogic.Skin.label);
+                GUI.Label(new Rect(12, y + 4, 150, 18), DeepJebLoc.Presets, HighLogic.Skin.label);
                 GUI.Box(presetRect, "");
 
                 var presets = ProviderConfig.BuiltInProviders();
@@ -241,7 +241,7 @@ namespace DeepJeb.Unity.UI.Settings
                 }
                 // Custom option
                 GUI.color = AccentColor;
-                if (GUI.Button(new Rect(0, py, pViewRect.width, 20), "Custom...", HighLogic.Skin.button))
+                if (GUI.Button(new Rect(0, py, pViewRect.width, 20), DeepJebLoc.Custom, HighLogic.Skin.button))
                 {
                     _newName = ""; _newProtoIdx = 0; _newUrl = ""; _newKey = "";
                 }
@@ -251,10 +251,10 @@ namespace DeepJeb.Unity.UI.Settings
                 // Right: form fields
                 float fx = 172;
                 float fy = y + 4;
-                GUI.Label(new Rect(fx, fy, 60, 18), "Name:", HighLogic.Skin.label);
+                GUI.Label(new Rect(fx, fy, 60, 18), DeepJebLoc.NameLabel, HighLogic.Skin.label);
                 _newName = GUI.TextField(new Rect(fx + 55, fy, 220, 18), _newName ?? "", HighLogic.Skin.textField);
                 fy += 24;
-                GUI.Label(new Rect(fx, fy, 60, 18), "Protocol:", HighLogic.Skin.label);
+                GUI.Label(new Rect(fx, fy, 60, 18), DeepJebLoc.ProtocolLabel, HighLogic.Skin.label);
                 string[] protos = { "OpenAI", "Anthropic", "Google" };
                 _newProtoIdx = GUI.Toolbar(new Rect(fx + 55, fy, 200, 18), _newProtoIdx, protos, HighLogic.Skin.button);
                 fy += 26;
@@ -280,7 +280,7 @@ namespace DeepJeb.Unity.UI.Settings
                 // Model checkboxes — scrollable to prevent overflow
                 if (_availableModels.Count > 0)
                 {
-                    GUI.Label(new Rect(fx, fy, 100, 18), "Models:", HighLogic.Skin.label);
+                    GUI.Label(new Rect(fx, fy, 100, 18), DeepJebLoc.ModelsLabel, HighLogic.Skin.label);
                     fy += 18;
                     float mcBoxH = Mathf.Min(100f, _availableModels.Count * 18f + 4f);
                     Rect mcRect = new Rect(fx, fy, 230, mcBoxH);

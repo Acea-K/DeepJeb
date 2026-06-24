@@ -355,7 +355,7 @@ namespace DeepJeb.Unity.UI.Chat
                     if (fetching)
                     {
                         GUI.Label(new Rect(12, my, btnW - 8, 22),
-                            "<i>Loading...</i>", HighLogic.Skin.label);
+                            "<i>" + DeepJebLoc.Loading + "</i>", HighLogic.Skin.label);
                     }
                     else if (displayModels != null && displayModels.Count > 0)
                     {
@@ -382,7 +382,7 @@ namespace DeepJeb.Unity.UI.Chat
                     else
                     {
                         GUI.Label(new Rect(12, my, btnW - 8, 22),
-                            "<i>No models available</i>", HighLogic.Skin.label);
+                            "<i>" + DeepJebLoc.NoModels + "</i>", HighLogic.Skin.label);
                     }
                 }
             }

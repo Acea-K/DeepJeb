@@ -50,8 +50,22 @@ namespace DeepJeb.Unity.Localization
         // Status bar
         public static string NoData => Localizer.Format("#deepjeb_no_data");
 
+        // Settings form
+        public static string Presets => Localizer.Format("#deepjeb_presets");
+        public static string Custom => Localizer.Format("#deepjeb_custom");
+        public static string NameLabel => Localizer.Format("#deepjeb_name_label");
+        public static string ProtocolLabel => Localizer.Format("#deepjeb_protocol_label");
+        public static string ModelsLabel => Localizer.Format("#deepjeb_models_label");
+        public static string ConnectionSuccess => Localizer.Format("#deepjeb_connection_success");
+        public static string ConnectionFailed => Localizer.Format("#deepjeb_connection_failed");
+
+        // Model dropdown
+        public static string Loading => Localizer.Format("#deepjeb_loading");
+        public static string NoModels => Localizer.Format("#deepjeb_no_models");
+
         // Errors
         public static string NoProviderError => Localizer.Format("#deepjeb_no_provider_error");
         public static string BlockedPrefix => Localizer.Format("#deepjeb_blocked_prefix");
+        public static string UnknownError => Localizer.Format("#deepjeb_unknown_error");
     }
 }

@@ -86,6 +86,9 @@ cp -r "$PROJ/GameData/DeepJeb/Textures/." "$DEPLOY/Textures/" 2>/dev/null || tru
 # Copy version file
 cp "$PROJ/GameData/DeepJeb/DeepJeb.version" "$DEPLOY/"
 
+# Copy CHANGELOG
+cp "$PROJ/CHANGELOG.md" "$DEPLOY/"
+
 # Only copy DeepJeb.cfg if it doesn't exist in deploy (preserve user's runtime config)
 if [ ! -f "$DEPLOY/DeepJeb.cfg" ]; then
     cp "$PROJ/GameData/DeepJeb/DeepJeb.cfg" "$DEPLOY/"

@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.5.3
+
+- Completed localization entries for Settings form, model dropdown, and connection status
+- Added KSP Craft Files skill: .craft format reference with PART fields, quaternion rotation, attachment nodes, mirror symmetry, radial sizes, stock part data, parser tools, and troubleshooting
+- Removed .craft file restriction from system prompt (now aligns with new Craft Files skill)
+
 ## v0.5.2
 
 **Streaming & Rendering**
