@@ -13,7 +13,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
   <a href="#"><img src="https://img.shields.io/badge/KSP-1.12.5-blue" alt="KSP 1.12.5"></a>
-  <a href="#"><img src="https://img.shields.io/badge/version-0.5.3.1-green" alt="v0.5.3.1"></a>
+  <a href="#"><img src="https://img.shields.io/badge/version-0.5.4-green" alt="v0.5.4"></a>
 </p>
 
 <p align="center">
@@ -65,6 +65,18 @@ Skills are matched automatically by keyword overlap with your question — the t
 | `get_game_state` | Report current KSP game state (vessel, orbit, biome, resources) |
 
 The AI can read Squad/SquadExpansion files but **cannot modify or delete** them.
+
+### Slash Commands
+
+Type `/` in the chat input to run commands locally — no AI round-trip:
+
+| Command | What it does |
+|---------|-------------|
+| `/retry` | Resend your last message to the AI |
+| `/undo` | Remove the last exchange pair from the session |
+| `/help` | List all available commands |
+| `/session` | Show current session info (provider, model, message count) |
+| `/game` | Display current KSP game state (scene, vessel, orbit, biome, resources) |
 
 ---
 

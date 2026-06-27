@@ -67,5 +67,19 @@ namespace DeepJeb.Unity.Localization
         public static string NoProviderError => Localizer.Format("#deepjeb_no_provider_error");
         public static string BlockedPrefix => Localizer.Format("#deepjeb_blocked_prefix");
         public static string UnknownError => Localizer.Format("#deepjeb_unknown_error");
+
+        // ---- Slash command errors ----
+        public static string CmdNoSession => Localizer.Format("#deepjeb_cmd_no_session");
+        public static string CmdNoRetry => Localizer.Format("#deepjeb_cmd_no_retry");
+        public static string CmdRetrying => Localizer.Format("#deepjeb_cmd_retrying");
+        public static string CmdSessionEmpty => Localizer.Format("#deepjeb_cmd_session_empty");
+        public static string CmdNoUndo => Localizer.Format("#deepjeb_cmd_no_undo");
+        public static string CmdUndone => Localizer.Format("#deepjeb_cmd_undone");
+        public static string CmdHelpInit => Localizer.Format("#deepjeb_cmd_help_init");
+        public static string CmdUnknown => Localizer.Format("#deepjeb_cmd_unknown");
+        public static string CmdNoCommand => Localizer.Format("#deepjeb_cmd_no_command");
+        public static string CmdGameUnavail => Localizer.Format("#deepjeb_cmd_game_unavail");
+        public static string CmdNoGameState => Localizer.Format("#deepjeb_cmd_no_game_state");
+        public static string CmdGameParse => Localizer.Format("#deepjeb_cmd_game_parse");
     }
 }

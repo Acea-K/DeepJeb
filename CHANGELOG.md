@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.5.4
+
+**Command System**
+- Added slash command system: `/retry`, `/undo`, `/help`, `/session`, `/game` — locally processed, no LLM round-trip
+- Retry command recovers failed messages; undo removes last exchange pair with full tool-call chain support
+- All command error messages localized across 9 languages
+
+**Core Fixes**
+- Fixed message loss on API failure: user messages now persist to session data, enabling `/retry` recovery
+- Fixed session isolation: Clear button generates new session ID, preventing cross-session context leakage
+- Fixed Enter key bypassing generation guard, preventing concurrent coroutine races
+- Undo command updates retry target to the previous user message after removal
+
 ## v0.5.3.1
 
 - Added `craft` to brace auto-completion language set (code blocks tagged ` ```craft ` or auto-detected by `PART`/`ship =` now get bracket auto-close)

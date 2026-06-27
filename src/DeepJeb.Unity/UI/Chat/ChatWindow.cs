@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DeepJeb.Core.Agent;
+using DeepJeb.Core.Agent.Commands;
 using DeepJeb.Core.Models;
 using DeepJeb.Protocol;
 using DeepJeb.Unity.Localization;
@@ -29,11 +30,23 @@ namespace DeepJeb.Unity.UI.Chat
         /// <summary>The chat session driving this window.</summary>
         public ChatSession Session { get; set; }
 
+        /// <summary>Command dispatcher for slash commands (/retry, /help, etc.).</summary>
+        public CommandDispatcher CommandDispatcher { get; set; }
+
         /// <summary>Context manager for model limit lookup (set by DeepJebMod).</summary>
         public Core.Context.IContextManager ContextProvider { get; set; }
 
         /// <summary>Called when user clicks Send. Returns AI response text.</summary>
         public Func<string, string> OnSendMessage { get; set; }
+
+        /// <summary>Called by commands (/undo) to save the session.</summary>
+        public Action OnSessionSave { get; set; }
+
+        /// <summary>Called by commands (/undo) to refresh the session list.</summary>
+        public Action OnSessionListRefresh { get; set; }
+
+        /// <summary>Called by commands (/undo) to rebuild display from Session.Messages.</summary>
+        public Action OnRebuildDisplay { get; set; }
 
         /// <summary>Current provider name (set by DeepJebMod).</summary>
         public string ProviderName { get; set; }
@@ -272,7 +285,8 @@ namespace DeepJeb.Unity.UI.Chat
             if (Event.current != null && Event.current.type == EventType.KeyDown &&
                 (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.KeypadEnter) &&
                 !Event.current.control && !Event.current.shift &&
-                GUI.GetNameOfFocusedControl() == "DeepJeb_Input")
+                GUI.GetNameOfFocusedControl() == "DeepJeb_Input" &&
+                !(Session != null && Session.IsGenerating))
             {
                 SubmitMessage();
                 Event.current.Use();
@@ -408,8 +422,24 @@ namespace DeepJeb.Unity.UI.Chat
         {
             if (string.IsNullOrWhiteSpace(_inputText)) return;
             string text = _inputText.Trim();
+
+            // Slash command detection — handled locally, no LLM round-trip
+            if (text.StartsWith("/"))
+            {
+                _inputText = "";
+                ExecuteCommand(text);
+                return;
+            }
+
             _inputText = "";
 
+            if (OnSendMessage != null)
+                SendUserMessage(text);
+        }
+
+        /// <summary>Add a user message to the display and invoke the pipeline send.</summary>
+        private void SendUserMessage(string text)
+        {
             _messages.Add(new DisplayMessage
             {
                 Role = ChatMessage.RoleType.User,
@@ -420,23 +450,49 @@ namespace DeepJeb.Unity.UI.Chat
                 }
             });
             _pendingScrollFrames = 1;
-
-            if (OnSendMessage != null)
+            _progressDotsRoutine = StartCoroutine(ProgressDots());
+            string response = OnSendMessage?.Invoke(text);
+            if (response != null)
             {
-                // Start progress dot animation — runs until first token or stop
-                _progressDotsRoutine = StartCoroutine(ProgressDots());
-
-                string response = OnSendMessage(text);
-
-                // Sync response: stop dots and display result immediately
-                if (response != null)
-                {
-                    StopProgressDots();
-                    AddAiResponse(response);
-                }
-                // Async (streaming): dots stay until first token arrives, or user stops generation.
-                _pendingScrollFrames = 1;
+                StopProgressDots();
+                AddAiResponse(response);
             }
+        }
+
+        /// <summary>Parse and dispatch a slash command locally.</summary>
+        private void ExecuteCommand(string text)
+        {
+            if (CommandDispatcher == null) return;
+
+            var parts = text.Split(new[] { ' ' }, 2);
+            string cmdName = parts[0];
+            string args = parts.Length > 1 ? parts[1] : "";
+
+            var ctx = new CommandContext
+            {
+                Session = Session,
+                OnSendMessage = msg => SendUserMessage(msg),
+                OnStopGeneration = () => OnStopGeneration?.Invoke(),
+                OnSaveSession = () => OnSessionSave?.Invoke(),
+                OnRefreshSessionList = () => OnSessionListRefresh?.Invoke(),
+                OnRequestRedraw = () => RequestRedraw(),
+                OnRebuildDisplay = () => OnRebuildDisplay?.Invoke(),
+                DisplayMessage = msg => AddSystemMessage(msg)
+            };
+
+            var result = CommandDispatcher.Dispatch(cmdName, args, ctx);
+
+            // Display feedback as system message
+            if (!string.IsNullOrEmpty(result.Message))
+                AddSystemMessage(result.Message);
+
+            // /retry triggers a pipeline send
+            if (result.TriggerSend && !string.IsNullOrEmpty(result.SendText))
+            {
+                SendUserMessage(result.SendText);
+            }
+
+            _pendingScrollFrames = 1;
         }
 
         /// <summary>Stop and remove the progress dot animation.</summary>

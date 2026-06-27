@@ -27,16 +27,19 @@ namespace DeepJeb.Core.Agent
         public string ModelName { get; set; }
 
         /// <summary>Session creation timestamp.</summary>
-        public DateTime CreatedAt { get; }
+        public DateTime CreatedAt { get; set; }
 
         /// <summary>Session ID (yyyyMMdd-HHmmss format).</summary>
-        public string SessionId { get; }
+        public string SessionId { get; set; }
 
         /// <summary>Whether a generation is currently in progress.</summary>
         public bool IsGenerating { get; set; }
 
         /// <summary>Latest error message, if any.</summary>
         public string LastError { get; private set; }
+
+        /// <summary>Last user message sent (for /retry).</summary>
+        public string LastUserMessage { get; set; }
 
         /// <summary>Token usage info from last response.</summary>
         public int LastPromptTokens { get; private set; }
@@ -46,6 +49,12 @@ namespace DeepJeb.Core.Agent
         {
             _pipeline = pipeline ?? throw new ArgumentNullException(nameof(pipeline));
             Messages = new List<ChatMessage>();
+            ResetSessionId();
+        }
+
+        /// <summary>Generate a fresh session ID and creation timestamp.</summary>
+        public void ResetSessionId()
+        {
             CreatedAt = DateTime.UtcNow;
             SessionId = CreatedAt.ToString("yyyyMMdd-HHmmss") + "-" + Guid.NewGuid().ToString("N").Substring(0, 4);
         }
@@ -64,6 +73,7 @@ namespace DeepJeb.Core.Agent
 
             IsGenerating = true;
             LastError = null;
+            LastUserMessage = userText;
 
             try
             {
@@ -115,6 +125,8 @@ namespace DeepJeb.Core.Agent
             if (!string.IsNullOrEmpty(_pipeline.SystemPrompt))
                 Messages.Add(ChatMessage.CreateSystem(_pipeline.SystemPrompt));
             LastError = null;
+            LastUserMessage = null;
+            ResetSessionId();
             _pipeline.ResetSecurity();
         }
 

@@ -18,6 +18,7 @@ using DeepJeb.Unity.Localization;
 using DeepJeb.Unity.UI.Chat;
 using DeepJeb.Unity.UI.Settings;
 using DeepJeb.Unity.Toolbar;
+using DeepJeb.Core.Agent.Commands;
 using DeepJeb.Unity.Tools;
 using UnityEngine;
 
@@ -35,6 +36,7 @@ namespace DeepJeb
         public ContextManager ContextMgr { get; private set; }
         public ChatPipeline ChatPipeline { get; private set; }
         public ChatSession ChatSession { get; private set; }
+        public CommandDispatcher CommandDispatcher { get; private set; }
         public ConfigurationManager Config { get; private set; }
         private JsonSessionStore _sessionStore;
 
@@ -65,6 +67,7 @@ namespace DeepJeb
             InitializeContext();
             InitializeTools();
             InitializePipeline();
+            InitializeCommands();
             InitializeConfig();
             InitializeSessionStore();
             InitializeUI();
@@ -126,6 +129,50 @@ namespace DeepJeb
         {
             if (string.IsNullOrEmpty(s) || s.Length <= max) return s;
             return s.Substring(0, max) + "...";
+        }
+
+        private void InitializeCommands()
+        {
+            // Apply localized error messages to command system
+            CommandMessages.NoActiveSession = DeepJebLoc.CmdNoSession;
+            CommandMessages.NoMessageToRetry = DeepJebLoc.CmdNoRetry;
+            CommandMessages.Retrying = DeepJebLoc.CmdRetrying;
+            CommandMessages.SessionEmpty = DeepJebLoc.CmdSessionEmpty;
+            CommandMessages.NoUserMessageToUndo = DeepJebLoc.CmdNoUndo;
+            CommandMessages.UndoRemoved = DeepJebLoc.CmdUndone;
+            CommandMessages.HelpNotInitialized = DeepJebLoc.CmdHelpInit;
+            CommandMessages.UnknownCommand = DeepJebLoc.CmdUnknown;
+            CommandMessages.NoCommandSpecified = DeepJebLoc.CmdNoCommand;
+            CommandMessages.GameStateUnavailable = DeepJebLoc.CmdGameUnavail;
+            CommandMessages.NoGameState = DeepJebLoc.CmdNoGameState;
+            CommandMessages.GameStateParseFailed = DeepJebLoc.CmdGameParse;
+
+            CommandDispatcher = new CommandDispatcher();
+            CommandDispatcher.Register(new RetryCommand());
+            CommandDispatcher.Register(new UndoCommand());
+
+            var helpCmd = new HelpCommand { Dispatcher = CommandDispatcher };
+            CommandDispatcher.Register(helpCmd);
+
+            CommandDispatcher.Register(new SessionInfoCommand());
+
+            var gameCmd = new GameCommand();
+            // GameStateFetcher: calls GetGameStateTool synchronously (KSP main thread is OK)
+            gameCmd.GameStateFetcher = () =>
+            {
+                try
+                {
+                    var tool = ToolRegistry?.Get("get_game_state");
+                    if (tool == null) return null;
+                    var task = tool.ExecuteAsync("{}");
+                    // GetGameStateTool is fully synchronous (no awaits);
+                    // the task is always already completed on return.
+                    if (!task.IsCompleted) task.Wait(1000); // defensive timeout
+                    return task.IsCompleted && !task.IsFaulted ? task.Result : null;
+                }
+                catch { return null; }
+            };
+            CommandDispatcher.Register(gameCmd);
         }
 
         private void InitializeSessionStore()
@@ -242,12 +289,22 @@ namespace DeepJeb
                 _chatObj.transform.parent = transform;
                 _chatWindow = _chatObj.AddComponent<ChatWindow>();
                 _chatWindow.Session = ChatSession;
+                _chatWindow.CommandDispatcher = CommandDispatcher;
+                _chatWindow.OnSessionSave = AutoSaveSession;
+                _chatWindow.OnSessionListRefresh = RefreshSessionList;
+                _chatWindow.OnRebuildDisplay = () =>
+                {
+                    _chatWindow.StopProgressDots();
+                    _chatWindow.RebuildDisplayFromMessages(ChatSession.Messages);
+                };
                 _chatWindow.ContextProvider = ContextMgr;
 
                 _chatWindow.OnSendMessage = userText =>
                 {
                     if (_activeClient == null)
                         return DeepJebLoc.ErrorPrefix + " " + DeepJebLoc.NoProviderError;
+                    if (ChatSession.IsGenerating)
+                        return null;
 
                     // Start coroutine to avoid freezing the main thread
                     _activeSendCoroutine = StartCoroutine(SendCoroutine(userText));
@@ -588,6 +645,12 @@ namespace DeepJeb
                 _chatWindow?.StopProgressDots();
                 _chatWindow?.AddAiResponse(DeepJebLoc.ErrorPrefix + " " +
                     (task.Exception?.InnerException?.Message ?? DeepJebLoc.RequestFailed));
+                // Persist the user message even on failure so /retry can recover it
+                if (!string.IsNullOrEmpty(ChatSession.LastUserMessage))
+                    ChatSession.Messages.Add(ChatMessage.CreateUser(ChatSession.LastUserMessage));
+                AutoSaveSession();
+                RefreshSessionList();
+                _chatWindow?.RequestRedraw();
                 yield break;
             }
 
@@ -600,13 +663,16 @@ namespace DeepJeb
                 AutoSaveSession();
                 RefreshSessionList();
             }
-            else if (pipelineResult != null && !pipelineResult.Success)
+            else
             {
-                _chatWindow?.AddAiResponse(DeepJebLoc.ErrorPrefix + " " +
-                    (pipelineResult.ErrorMessage ?? DeepJebLoc.UnknownError));
+                string err = pipelineResult?.ErrorMessage ?? ChatSession.LastError ?? DeepJebLoc.UnknownError;
+                _chatWindow?.AddAiResponse(DeepJebLoc.ErrorPrefix + " " + err);
+                // Persist the user message even on pipeline failure
+                if (!string.IsNullOrEmpty(ChatSession.LastUserMessage))
+                    ChatSession.Messages.Add(ChatMessage.CreateUser(ChatSession.LastUserMessage));
+                AutoSaveSession();
+                RefreshSessionList();
             }
-            else if (!string.IsNullOrEmpty(ChatSession.LastError))
-                _chatWindow?.AddAiResponse(DeepJebLoc.ErrorPrefix + " " + ChatSession.LastError);
 
             _chatWindow?.RequestRedraw();
         }
@@ -657,6 +723,11 @@ namespace DeepJeb
             // Prepend the current system prompt
             msgs.Insert(0, ChatMessage.CreateSystem(ChatPipeline?.SystemPrompt ?? ""));
             ChatSession.Messages = msgs;
+
+            // Adopt the loaded session's ID so AutoSaveSession writes to the correct file
+            ChatSession.SessionId = data.Id;
+            ChatSession.CreatedAt = data.CreatedAt;
+            ChatSession.LastUserMessage = null;
 
             // Switch to the loaded session's provider. If the provider no longer
             // exists, keep the current client to avoid client/model mismatch (400).
