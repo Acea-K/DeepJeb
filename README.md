@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <strong>English</strong> | <a href="README_cn.md">中文</a>
+  <strong>English</strong> | <a href="README/README_cn.md">简体中文</a> | <a href="README/README_de.md">Deutsch</a> | <a href="README/README_fr.md">Français</a> | <a href="README/README_it.md">Italiano</a> | <a href="README/README_ja.md">日本語</a> | <a href="README/README_pt.md">Português</a> | <a href="README/README_ru.md">Русский</a> | <a href="README/README_es.md">Español</a>
 </p>
 
 ---
@@ -36,7 +36,7 @@ DeepJeb ships with a comprehensive **KSP world knowledge base**: game mechanics,
 
 ## What Can It Do?
 
-DeepJeb comes with **7 built-in knowledge bases** (Claude Skills) and **7 file-system tools** the AI can use.
+DeepJeb comes with **7 built-in knowledge bases** (Agent Skills) and **7 file-system tools** the AI can use.
 
 ### Knowledge Bases (Skills)
 
@@ -94,14 +94,14 @@ Custom endpoints, API keys, model lists, and provider names are all configurable
 
 ---
 
-## What is a Claude Skill?
+## What is an Agent Skill?
 
-DeepJeb's knowledge bases are **Claude Skills** — a standard format for packaging domain expertise with an AI assistant. Each skill is a `SKILL.md` file with YAML frontmatter (name, description, triggers) and a Markdown body containing the knowledge. Skills are placed in the `Skills/` directory and loaded at startup.
+DeepJeb's knowledge bases are **Agent Skills** — a standard format for packaging domain expertise with an AI assistant. Each skill is a `SKILL.md` file with YAML frontmatter (name, description, triggers) and a Markdown body containing the knowledge. Skills are placed in the `Skills/` directory and loaded at startup.
 
 ### How Skills Work
 
-- **[Claude Code Skills documentation](https://docs.anthropic.com/en/docs/claude-code/skills)** — official guide
-- **[Creating custom skills](https://docs.anthropic.com/en/docs/claude-code/skills#creating-custom-skills)** — authoring guide
+- **[Agent Skills documentation](https://docs.anthropic.com/en/docs/claude-code/skills)** — official guide (via Claude Code docs)
+- **[Creating custom skills](https://docs.anthropic.com/en/docs/claude-code/skills#creating-custom-skills)** — authoring guide (via Claude Code docs)
 
 To add your own skill to DeepJeb, create a `SKILL.md` file in `GameData/DeepJeb/Skills/{category}/{name}/` with:
 

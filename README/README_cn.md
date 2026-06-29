@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/Textures/DeepJebLogo.png" alt="DeepJeb Logo" width="256">
+  <img src="../assets/Textures/DeepJebLogo.png" alt="DeepJeb Logo" width="256">
 </p>
 
 <h1 align="center">DeepJeb</h1>
@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <a href="README.md">English</a> | <strong>中文</strong>
+  <a href="../README.md">English</a> | <strong>简体中文</strong> | <a href="README_de.md">Deutsch</a> | <a href="README_fr.md">Français</a> | <a href="README_it.md">Italiano</a> | <a href="README_ja.md">日本語</a> | <a href="README_pt.md">Português</a> | <a href="README_ru.md">Русский</a> | <a href="README_es.md">Español</a>
 </p>
 
 ---
@@ -36,7 +36,7 @@ DeepJeb 内置了全面的 **KSP 世界知识库**：游戏机制、轨道物理
 
 ## 能做什么？
 
-DeepJeb 自带 **7 个内置知识库**（Claude 技能）和 **7 个文件系统工具**，AI 可以直接使用。
+DeepJeb 自带 **7 个内置知识库**（Agent 技能）和 **7 个文件系统工具**，AI 可以直接使用。
 
 ### 知识库（技能）
 
@@ -94,14 +94,14 @@ AI 可以读取 Squad/SquadExpansion 目录下的文件，但**无法修改或�
 
 ---
 
-## 什么是 Claude 技能？
+## 什么是 Agent 技能？
 
-DeepJeb 的知识库是 **Claude 技能**——一种将领域专业知识打包给 AI 助手的标准格式。每个技能是一个 `SKILL.md` 文件，包含 YAML 前置元数据（名称、描述、触发条件）和包含知识内容的 Markdown 正文。技能放置在 `Skills/` 目录下，启动时加载。
+DeepJeb 的知识库是 **Agent 技能**——一种将领域专业知识打包给 AI 助手的标准格式。每个技能是一个 `SKILL.md` 文件，包含 YAML 前置元数据（名称、描述、触发条件）和包含知识内容的 Markdown 正文。技能放置在 `Skills/` 目录下，启动时加载。
 
 ### 技能如何工作
 
-- **[Claude Code 技能文档](https://docs.anthropic.com/en/docs/claude-code/skills)** — 官方指南
-- **[创建自定义技能](https://docs.anthropic.com/en/docs/claude-code/skills#creating-custom-skills)** — 编写指南
+- **[Agent 技能文档](https://docs.anthropic.com/zh-CN/docs/claude-code/skills)** — 官方指南（出自 Claude Code 文档）
+- **[创建自定义技能](https://docs.anthropic.com/zh-CN/docs/claude-code/skills#creating-custom-skills)** — 编写指南（出自 Claude Code 文档）
 
 要向 DeepJeb 添加你自己的技能，在 `GameData/DeepJeb/Skills/{分类}/{名称}/` 中创建一个 `SKILL.md` 文件：
 
