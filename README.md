@@ -166,7 +166,7 @@ Use `file_exists` or `list_directory` tool calls as conditions to gate skill loa
 
 [MIT License](LICENSE)
 
-Copyright © 2026 Acea - vibe coded using Claude Code / DeepSeek V4 Pro
+Copyright © 2026 Acea - vibe coded using Codex / DeepSeek V4 Pro
 
 MiniJSON based on the public-domain implementation by Calvin Rien.
 

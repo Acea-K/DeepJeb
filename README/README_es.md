@@ -166,7 +166,7 @@ Usa llamadas a herramientas `file_exists` o `list_directory` como condiciones pa
 
 [Licencia MIT](LICENSE)
 
-Copyright © 2026 Acea - desarrollado con Claude Code / DeepSeek V4 Pro
+Copyright © 2026 Acea - desarrollado con Codex / DeepSeek V4 Pro
 
 MiniJSON está basado en la implementación de dominio público de Calvin Rien.
 

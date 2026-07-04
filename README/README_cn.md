@@ -166,7 +166,7 @@ condition: file_exists("MyMod/") -> true
 
 [MIT License](LICENSE)
 
-Copyright © 2026 Acea - 使用 Claude Code / DeepSeek V4 Pro 开发
+Copyright © 2026 Acea - 使用 Codex / DeepSeek V4 Pro 开发
 
 MiniJSON 基于 Calvin Rien 的公有领域实现。
 

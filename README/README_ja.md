@@ -166,7 +166,7 @@ condition: file_exists("MyMod/") -> true
 
 [MIT ライセンス](LICENSE)
 
-Copyright © 2026 Acea - Claude Code / DeepSeek V4 Pro を使用して開発
+Copyright © 2026 Acea - Codex / DeepSeek V4 Pro を使用して開発
 
 MiniJSON は Calvin Rien によるパブリックドメイン実装に基づいています。
 

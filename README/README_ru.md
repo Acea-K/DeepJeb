@@ -166,7 +166,7 @@ condition: file_exists("MyMod/") -> true
 
 [Лицензия MIT](LICENSE)
 
-Copyright © 2026 Acea - разработано с помощью Claude Code / DeepSeek V4 Pro
+Copyright © 2026 Acea - разработано с помощью Codex / DeepSeek V4 Pro
 
 MiniJSON основан на реализации Кэлвина Рина, находящейся в общественном достоянии.
 
