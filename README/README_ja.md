@@ -13,7 +13,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT ライセンス"></a>
   <a href="#"><img src="https://img.shields.io/badge/KSP-1.12.5-blue" alt="KSP 1.12.5"></a>
-  <a href="#"><img src="https://img.shields.io/badge/version-0.5.4-green" alt="v0.5.4"></a>
+  <a href="#"><img src="https://img.shields.io/badge/version-0.5.5-green" alt="v0.5.5"></a>
 </p>
 
 <p align="center">
@@ -63,6 +63,8 @@ DeepJeb には **7 つの組み込み知識ベース**（Agent スキル）と A
 | `file_exists` | ファイルまたはディレクトリの存在を確認 |
 | `backup_file` | 元ファイルを変更せずにタイムスタンプ付き `.bak` スナップショットを作成 |
 | `get_game_state` | 現在の KSP ゲーム状態を報告（船体、軌道、バイオーム、リソース） |
+| `web_search` | Webで最新情報やドキュメントを検索 |
+| `fetch_url` | Webページのテキスト内容を取得 |
 
 AI は Squad/SquadExpansion ファイルを読み取れますが、**変更または削除はできません**。
 
@@ -166,7 +168,7 @@ condition: file_exists("MyMod/") -> true
 
 [MIT ライセンス](LICENSE)
 
-Copyright © 2026 Acea - Codex / DeepSeek V4 Pro を使用して開発
+Copyright © 2026 Acea - Claude Code / DeepSeek V4 Pro を使用して開発
 
 MiniJSON は Calvin Rien によるパブリックドメイン実装に基づいています。
 

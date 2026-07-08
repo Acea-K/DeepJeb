@@ -13,7 +13,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="Лицензия MIT"></a>
   <a href="#"><img src="https://img.shields.io/badge/KSP-1.12.5-blue" alt="KSP 1.12.5"></a>
-  <a href="#"><img src="https://img.shields.io/badge/version-0.5.4-green" alt="v0.5.4"></a>
+  <a href="#"><img src="https://img.shields.io/badge/version-0.5.5-green" alt="v0.5.5"></a>
 </p>
 
 <p align="center">
@@ -63,6 +63,8 @@ DeepJeb поставляется с **7 встроенными базами зн
 | `file_exists` | Проверить, существует ли файл или каталог |
 | `backup_file` | Создать снимок `.bak` с меткой времени без изменения оригинала |
 | `get_game_state` | Сообщить текущее состояние игры KSP (корабль, орбита, биом, ресурсы) |
+| `web_search` | Поиск в интернете актуальной информации и документации |
+| `fetch_url` | Читает текстовое содержимое веб-страницы |
 
 ИИ может читать файлы Squad/SquadExpansion, но **не может изменять или удалять их**.
 
@@ -166,7 +168,7 @@ condition: file_exists("MyMod/") -> true
 
 [Лицензия MIT](LICENSE)
 
-Copyright © 2026 Acea - разработано с помощью Codex / DeepSeek V4 Pro
+Copyright © 2026 Acea - разработано с помощью Claude Code / DeepSeek V4 Pro
 
 MiniJSON основан на реализации Кэлвина Рина, находящейся в общественном достоянии.
 

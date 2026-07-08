@@ -13,7 +13,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
   <a href="#"><img src="https://img.shields.io/badge/KSP-1.12.5-blue" alt="KSP 1.12.5"></a>
-  <a href="#"><img src="https://img.shields.io/badge/version-0.5.4-green" alt="v0.5.4"></a>
+  <a href="#"><img src="https://img.shields.io/badge/version-0.5.5-green" alt="v0.5.5"></a>
 </p>
 
 <p align="center">
@@ -63,6 +63,8 @@ Skills werden automatisch durch Schlüsselwortüberschneidung mit deiner Frage z
 | `file_exists` | Prüfen, ob eine Datei oder ein Verzeichnis existiert |
 | `backup_file` | Zeitgestempelte `.bak`-Momentaufnahme ohne Änderung der Originaldatei erstellen |
 | `get_game_state` | Aktuellen KSP-Spielzustand melden (Schiff, Orbit, Biom, Ressourcen) |
+| `web_search` | Durchsucht das Web nach aktuellen Informationen und Dokumentation |
+| `fetch_url` | Ruft den Textinhalt einer Webseite ab |
 
 Die KI kann Squad/SquadExpansion-Dateien lesen, aber **nicht ändern oder löschen**.
 
@@ -166,7 +168,7 @@ Verwende `file_exists`- oder `list_directory`-Toolaufrufe als Bedingungen, um da
 
 [MIT License](LICENSE)
 
-Copyright © 2026 Acea - entwickelt mit Codex / DeepSeek V4 Pro
+Copyright © 2026 Acea - entwickelt mit Claude Code / DeepSeek V4 Pro
 
 MiniJSON basiert auf der Public-Domain-Implementierung von Calvin Rien.
 

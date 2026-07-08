@@ -13,7 +13,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
   <a href="#"><img src="https://img.shields.io/badge/KSP-1.12.5-blue" alt="KSP 1.12.5"></a>
-  <a href="#"><img src="https://img.shields.io/badge/version-0.5.4-green" alt="v0.5.4"></a>
+  <a href="#"><img src="https://img.shields.io/badge/version-0.5.5-green" alt="v0.5.5"></a>
 </p>
 
 <p align="center">
@@ -36,7 +36,7 @@ DeepJeb ships with a comprehensive **KSP world knowledge base**: game mechanics,
 
 ## What Can It Do?
 
-DeepJeb comes with **7 built-in knowledge bases** (Agent Skills) and **7 file-system tools** the AI can use.
+DeepJeb comes with **7 built-in knowledge bases** (Agent Skills) and **9 tools** the AI can use.
 
 ### Knowledge Bases (Skills)
 
@@ -63,6 +63,8 @@ Skills are matched automatically by keyword overlap with your question — the t
 | `file_exists` | Check if a file or directory exists |
 | `backup_file` | Create a timestamped `.bak` snapshot without modifying the original |
 | `get_game_state` | Report current KSP game state (vessel, orbit, biome, resources) |
+| `web_search` | Search the web for current information and documentation |
+| `fetch_url` | Fetch and read the text content of a web page |
 
 The AI can read Squad/SquadExpansion files but **cannot modify or delete** them.
 
@@ -166,7 +168,7 @@ Use `file_exists` or `list_directory` tool calls as conditions to gate skill loa
 
 [MIT License](LICENSE)
 
-Copyright © 2026 Acea - vibe coded using Codex / DeepSeek V4 Pro
+Copyright © 2026 Acea - vibe coded using Claude Code / DeepSeek V4 Pro
 
 MiniJSON based on the public-domain implementation by Calvin Rien.
 

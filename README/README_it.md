@@ -13,7 +13,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="Licenza MIT"></a>
   <a href="#"><img src="https://img.shields.io/badge/KSP-1.12.5-blue" alt="KSP 1.12.5"></a>
-  <a href="#"><img src="https://img.shields.io/badge/version-0.5.4-green" alt="v0.5.4"></a>
+  <a href="#"><img src="https://img.shields.io/badge/version-0.5.5-green" alt="v0.5.5"></a>
 </p>
 
 <p align="center">
@@ -63,6 +63,8 @@ Le competenze vengono abbinate automaticamente per sovrapposizione di parole chi
 | `file_exists` | Verificare se un file o directory esiste |
 | `backup_file` | Creare un'istantanea `.bak` con timestamp senza modificare l'originale |
 | `get_game_state` | Riportare lo stato attuale del gioco KSP (navicella, orbita, bioma, risorse) |
+| `web_search` | Cerca sul web informazioni e documentazione aggiornate |
+| `fetch_url` | Legge il contenuto testuale di una pagina web |
 
 L'IA può leggere i file Squad/SquadExpansion ma **non può modificarli o eliminarli**.
 
@@ -166,7 +168,7 @@ Usa le chiamate agli strumenti `file_exists` o `list_directory` come condizioni 
 
 [Licenza MIT](LICENSE)
 
-Copyright © 2026 Acea - sviluppato con Codex / DeepSeek V4 Pro
+Copyright © 2026 Acea - sviluppato con Claude Code / DeepSeek V4 Pro
 
 MiniJSON è basato sull'implementazione di pubblico dominio di Calvin Rien.
 

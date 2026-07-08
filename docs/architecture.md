@@ -19,7 +19,8 @@ DeepJeb is structured as four assemblies in three conceptual layers. The guiding
 │  │ (IMGUI)  │ │ (IMGUI)  │ │ (IMGUI)  │ │ (AppLaunch)│  │
 │  └──────────┘ └──────────┘ └──────────┘ └────────────┘  │
 │  ┌────────────────────────────────────────────────────┐  │
-│  │ FileTools, GameStateTool (ITool implementations)    │  │
+│  │ FileTools, GameStateTool, WebSearchTool,   │  │
+│  │ FetchUrlTool (ITool implementations)         │  │
 │  └────────────────────────────────────────────────────┘  │
 │  ┌────────────────────────────────────────────────────┐  │
 │  │ ModLifecycle (scene change, auto-save, singleton)   │  │
@@ -158,10 +159,10 @@ Input (user message or AI response)
     │
     ▼
 [Hard Keyword Filter] ──block──> "Message blocked: [reason]"
-    │ (60+ keywords: identity manipulation, explicit content, extreme violence)
+    │ (63 keywords: identity manipulation, explicit content, extreme violence)
     ▼
 [Soft Keyword Filter] ──block──> "Message blocked: [reason]"
-    │ (30+ keywords, cumulative threshold of 2 hits in same session)
+    │ (42 keywords, cumulative threshold of 2 hits in same session)
     ▼
 [Path Sandbox]        ──block──> "Access denied: [reason]"
     │ (only for tool calls — absolute paths, .., ~, Squad/ forbidden)
@@ -286,8 +287,7 @@ GameData/
 │       ├── DeepJeb.dll          # Main mod assembly
 │       ├── DeepJeb.Core.dll
 │       ├── DeepJeb.Protocol.dll
-│       ├── DeepJeb.Unity.dll
-│       └── Newtonsoft.Json.dll
+│       └── DeepJeb.Unity.dll
 └── Skills/                      # Standard Claude Skill documents
     ├── stock-game/
     │   └── ksp-world-knowledge/
@@ -330,7 +330,7 @@ GameData/
 
 3. **IMGUI (not UGUI/UIToolkit)** — KSP's Unity 2019 uses the old IMGUI system for mod windows. UIToolkit is not available. uGUI (Canvas-based) is possible but IMGUI is simpler for draggable windows and consistent with KSP's modding conventions.
 
-4. **Coroutines + callbacks (not async/await throughout)** — While C# 7 supports async/await, Unity 2019's implementation is incomplete (no `await` in `OnGUI`, limited SynchronizationContext). HTTP calls use `UnityWebRequest` with coroutine callbacks for the Unity layer; Core layer uses `Task`-based async for testability.
+4. **APM async** — HTTP calls use `HttpWebRequest` with APM pattern (`BeginGetResponse`/`EndGetResponse`) to avoid thread-pool exhaustion. Unity layer uses coroutines for token polling on the main thread; Core layer uses `Task`-based async for testability.
 
 5. **Separate test assemblies per source project** — Each source project has a corresponding test project. This enforces that tests only depend on the layer under test. Core tests don't reference Unity; Protocol tests mock HTTP.
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.5.5
+
+- Added `web_search` tool: AI can search the web for current information, documentation, and answers
+- Added `fetch_url` tool: AI can read the contents of individual web pages
+
 ## v0.5.4
 
 **Command System**

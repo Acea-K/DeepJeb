@@ -109,6 +109,8 @@ namespace DeepJeb
             ToolRegistry.Register(new FileExistsTool(sandbox));
             ToolRegistry.Register(new BackupFileTool(sandbox));
             ToolRegistry.Register(new GetGameStateTool());
+            ToolRegistry.Register(new WebSearchTool());
+            ToolRegistry.Register(new FetchUrlTool());
         }
 
         private void InitializePipeline()

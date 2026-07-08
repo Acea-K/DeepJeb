@@ -13,7 +13,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
   <a href="#"><img src="https://img.shields.io/badge/KSP-1.12.5-blue" alt="KSP 1.12.5"></a>
-  <a href="#"><img src="https://img.shields.io/badge/version-0.5.4-green" alt="v0.5.4"></a>
+  <a href="#"><img src="https://img.shields.io/badge/version-0.5.5-green" alt="v0.5.5"></a>
 </p>
 
 <p align="center">
@@ -63,6 +63,8 @@ DeepJeb 自带 **7 个内置知识库**（Agent 技能）和 **7 个文件系统
 | `file_exists` | 检查文件或目录是否存在 |
 | `backup_file` | 创建带时间戳的 `.bak` 快照，不修改原文件 |
 | `get_game_state` | 报告当前 KSP 游戏状态（飞船、轨道、生物群系、资源） |
+| `web_search` | 搜索网络获取最新信息和文档 |
+| `fetch_url` | 读取指定网页的文字内容 |
 
 AI 可以读取 Squad/SquadExpansion 目录下的文件，但**无法修改或删除**它们。
 
@@ -166,7 +168,7 @@ condition: file_exists("MyMod/") -> true
 
 [MIT License](LICENSE)
 
-Copyright © 2026 Acea - 使用 Codex / DeepSeek V4 Pro 开发
+Copyright © 2026 Acea - 使用 Claude Code / DeepSeek V4 Pro 开发
 
 MiniJSON 基于 Calvin Rien 的公有领域实现。
 
