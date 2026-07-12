@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using DeepJeb.Core;
 
 namespace DeepJeb.Protocol
 {
@@ -128,7 +129,7 @@ namespace DeepJeb.Protocol
             request.Method = method;
             request.Timeout = timeoutMs;
             request.ReadWriteTimeout = timeoutMs;
-            request.UserAgent = "DeepJeb/0.5.5 (KSP Mod)";
+            request.UserAgent = "DeepJeb/" + DeepJebVersion.Current + " (KSP Mod)";
 
             if (!string.IsNullOrEmpty(apiKey))
             {

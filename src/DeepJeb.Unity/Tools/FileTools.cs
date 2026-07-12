@@ -57,12 +57,14 @@ namespace DeepJeb.Unity.Tools
     {
         private readonly PathSandbox _sandbox;
         private const int MaxFileSize = 10 * 1024 * 1024; // 10 MB
+        private const int MaxOutputChars = 50000; // Truncate content beyond ~12.5K tokens
 
         public ReadFileTool(PathSandbox sandbox) { _sandbox = sandbox; }
 
         public string Name => "read_file";
         public string Description =>
-            "Read the contents of a file in GameData. Max file size: 10 MB.";
+            "Read the contents of a file in GameData. Max file size: 10 MB. " +
+            "Content is truncated at ~50K characters to fit the context window.";
         public string ParametersSchema => @"{
             ""type"": ""object"",
             ""properties"": {
@@ -89,7 +91,24 @@ namespace DeepJeb.Unity.Tools
                     return Task.FromResult("{\"error\":\"File too large: " + fileInfo.Length + " bytes\"}");
 
                 string content = File.ReadAllText(resolvedPath, Encoding.UTF8);
-                return Task.FromResult(content);
+                int contentLen = content.Length;
+                bool truncated = false;
+
+                if (contentLen > MaxOutputChars)
+                {
+                    content = content.Substring(0, MaxOutputChars) +
+                        "\n\n... [truncated: " + (contentLen - MaxOutputChars) + " more characters]";
+                    truncated = true;
+                }
+
+                var result = new Dictionary<string, object>
+                {
+                    ["path"] = path,
+                    ["size"] = contentLen,
+                    ["truncated"] = truncated,
+                    ["content"] = content
+                };
+                return Task.FromResult(JsonMapper.Stringify(result));
             }
             catch (System.UnauthorizedAccessException ex)
             {
@@ -97,7 +116,7 @@ namespace DeepJeb.Unity.Tools
             }
             catch (System.Exception ex)
             {
-                return Task.FromResult("{\"error\":\"" + ex.Message.Replace("\"", "'") + "\"}");
+                return Task.FromResult("{\"error\":\"" + ex.Message.Replace("\"", "\u0027") + "\"}");
             }
         }
 
@@ -165,7 +184,7 @@ namespace DeepJeb.Unity.Tools
             }
             catch (System.Exception ex)
             {
-                return Task.FromResult("{\"error\":\"" + ex.Message.Replace("\"", "'") + "\"}");
+                return Task.FromResult("{\"error\":\"" + ex.Message.Replace("\"", "\u0027") + "\"}");
             }
         }
 
@@ -219,7 +238,7 @@ namespace DeepJeb.Unity.Tools
             }
             catch (System.Exception ex)
             {
-                return Task.FromResult("{\"error\":\"" + ex.Message.Replace("\"", "'") + "\"}");
+                return Task.FromResult("{\"error\":\"" + ex.Message.Replace("\"", "\u0027") + "\"}");
             }
         }
     }
@@ -291,7 +310,7 @@ namespace DeepJeb.Unity.Tools
             }
             catch (System.Exception ex)
             {
-                return Task.FromResult("{\"error\":\"" + ex.Message.Replace("\"", "'") + "\"}");
+                return Task.FromResult("{\"error\":\"" + ex.Message.Replace("\"", "\u0027") + "\"}");
             }
         }
     }
@@ -335,7 +354,7 @@ namespace DeepJeb.Unity.Tools
             }
             catch (System.Exception ex)
             {
-                return Task.FromResult("{\"exists\":false,\"path\":\"" + path + "\",\"error\":\"" + ex.Message.Replace("\"", "'") + "\"}");
+                return Task.FromResult("{\"exists\":false,\"path\":\"" + path + "\",\"error\":\"" + ex.Message.Replace("\"", "\u0027") + "\"}");
             }
         }
     }
@@ -383,7 +402,7 @@ namespace DeepJeb.Unity.Tools
             }
             catch (System.Exception ex)
             {
-                return Task.FromResult("{\"error\":\"" + ex.Message.Replace("\"", "'") + "\"}");
+                return Task.FromResult("{\"error\":\"" + ex.Message.Replace("\"", "\u0027") + "\"}");
             }
         }
     }

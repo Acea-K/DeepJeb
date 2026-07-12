@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DeepJeb.Core.Agent;
 using DeepJeb.Core.Agent.Commands;
 using DeepJeb.Core.Models;
+using DeepJeb.Core;
 using DeepJeb.Protocol;
 using DeepJeb.Unity.Localization;
 using DeepJeb.Unity.Rendering;
@@ -185,7 +186,7 @@ namespace DeepJeb.Unity.UI.Chat
 
             GUI.skin = HighLogic.Skin;
             WindowRect = GUI.Window(GetInstanceID(), WindowRect, DrawWindow,
-                "DeepJeb", HighLogic.Skin.window);
+                "DeepJeb " + DeepJebVersion.Current, HighLogic.Skin.window);
         }
 
         private void DrawWindow(int windowId)

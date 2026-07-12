@@ -50,7 +50,11 @@ namespace DeepJeb.Core.Context
         private readonly ConcurrentDictionary<string, int> _contextLimits;
 
         // Characters-per-token heuristic
-        private const double CharsPerToken = 4.0;
+        // Per-character token estimate. 4.0 works for English (avg 4 chars/token).
+        // Chinese/mixed CJK content consumes ~1.5 tokens per character, so 2.0
+        // provides a safe conservative estimate that avoids context overflow for
+        // both Latin and CJK scripts. Overestimate is safer than underflow.
+        private const double CharsPerToken = 2.0;
 
         // Truncation threshold: 90% of context limit
         private const double TruncationThreshold = 0.9;

@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.5.6
+
+**Context & Stability**
+- Fixed 400 errors on repeated tool-heavy queries: AgentLoop now re-trims conversation context between rounds, preventing accumulated tool results from overflowing the model's context window
+- Token estimator changed from 4.0 to 2.0 chars/token, restoring safe margin for CJK and mixed-language content — previous value underestimated Chinese text by up to 8x
+
+**Security**
+- Hard keyword filter: replaced several over-broad CJK substrings with precise multi-character phrases to eliminate false positives on common question patterns
+- Moved borderline security terms from hard to soft filter, reducing one-shot blocks during normal modding discussion
+
+**UI**
+- Window title now displays version number (e.g. `DeepJeb 0.5.6`)
+
+**Tools**
+- `read_file` now returns JSON-wrapped output (`path`, `size`, `truncated`, `content`) with a 50K-character cap; truncated results include a marker so the AI knows to refine its request
+
 ## v0.5.5
 
 - Added `web_search` tool: AI can search the web for current information, documentation, and answers

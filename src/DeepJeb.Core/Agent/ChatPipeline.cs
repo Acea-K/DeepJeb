@@ -35,7 +35,7 @@ namespace DeepJeb.Core.Agent
             _security = security ?? throw new ArgumentNullException(nameof(security));
             _skillMatcher = skillMatcher ?? throw new ArgumentNullException(nameof(skillMatcher));
             _contextManager = contextManager ?? throw new ArgumentNullException(nameof(contextManager));
-            _agentLoop = new AgentLoop(toolRegistry, agentConfig);
+            _agentLoop = new AgentLoop(toolRegistry, _contextManager, agentConfig);
 
             // Default system prompt — one sentence per line, paragraphs separated by \n\n
             SystemPrompt = "You are DeepJeb, an AI assistant working at Kerbal Space Center (KSC). " +
@@ -159,7 +159,7 @@ namespace DeepJeb.Core.Agent
             AgentLoopResult loopResult;
             try
             {
-                loopResult = await _agentLoop.RunWithFuncAsync(working, userMessage, sendFunc);
+                loopResult = await _agentLoop.RunWithFuncAsync(working, userMessage, sendFunc, null, modelName);
             }
             catch (Exception ex)
             {

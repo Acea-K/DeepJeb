@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DeepJeb.Core.Models;
+using DeepJeb.Core.Context;
 
 namespace DeepJeb.Core.Agent
 {
@@ -36,13 +37,16 @@ namespace DeepJeb.Core.Agent
         // Track the last N tool results for repeat detection
         private readonly Dictionary<string, Queue<string>> _toolResultHistory;
 
+        private readonly IContextManager _contextManager;
+
         /// <summary>Fires when a tool is about to be executed. (toolName, argumentsJson)</summary>
         public Action<string, string> OnToolExecuting { get; set; }
 
-        public AgentLoop(ToolRegistry toolRegistry, AgentLoopConfig defaultConfig = null)
+        public AgentLoop(ToolRegistry toolRegistry, IContextManager contextManager = null, AgentLoopConfig defaultConfig = null)
         {
             _toolRegistry = toolRegistry ?? throw new ArgumentNullException(nameof(toolRegistry));
             _defaultConfig = defaultConfig ?? new AgentLoopConfig();
+            _contextManager = contextManager;
             _toolResultHistory = new Dictionary<string, Queue<string>>();
         }
 
@@ -59,7 +63,8 @@ namespace DeepJeb.Core.Agent
             List<ChatMessage> conversation,
             string userMessage,
             Func<List<ChatMessage>, List<ITool>, Task<AiResponse>> sendFunc,
-            AgentLoopConfig config = null)
+            AgentLoopConfig config = null,
+            string modelName = null)
         {
             var cfg = config ?? _defaultConfig;
             var workingConversation = new List<ChatMessage>(conversation);

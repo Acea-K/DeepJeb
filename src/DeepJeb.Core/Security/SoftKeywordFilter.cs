@@ -118,6 +118,8 @@ namespace DeepJeb.Core.Security
                 "phishing attack",
                 "botnet",
                 "木马",
+                "泄露",
+                "绕过",
                 "病毒制作",
 
                 // Piracy / cracking
